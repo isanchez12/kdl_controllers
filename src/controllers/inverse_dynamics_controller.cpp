@@ -11,6 +11,9 @@
 #include <kdl_urdf_tools/tools.h>
 #include <controllerman_controllers/controllers/gravity_compensation.h>
 
+#include <effort_controllers/joint_position_controller.h>
+
+
 using namespace controllerman_controllers::controllers;
 
 GravityCompensation::GravityCompensation(std::string const& name) :
@@ -32,7 +35,7 @@ GravityCompensation::GravityCompensation(std::string const& name) :
 {
   // Declare properties
   this->addProperty("robot_description",robot_description_)
-    .doc("The WAM URDF xml string.");
+    .doc("The DaVinci_MTM URDF xml string.");
   this->addProperty("gravity",gravity_)
     .doc("The gravity vector in the root link frame.");
   this->addProperty("root_link",root_link_)
@@ -65,9 +68,8 @@ bool GravityCompensation::configureHook()
 
   // Create inverse dynamics chainsolver
   id_solver_.reset(
-      new KDL::ChainIdSolver_RNE(
-        kdl_chain_,
-        KDL::Vector(gravity_[0],gravity_[1],gravity_[2])));
+      new KDL::ChainIdSolver_RNE( kdl_chain_,
+                                KDL::Vector(gravity_[0],gravity_[1],gravity_[2])) );
 
   // Resize working vectors
   positions_.resize(n_dof_);
@@ -107,11 +109,11 @@ void GravityCompensation::updateHook()
 
   // Send joint positions
   torques_out_port_.write( torques_ );
-  for (int i=0; i< n_dof_; i++)
-    {
-      JointPositionController::setCommandCB( torques_);      
 
-    }
+  //Set the joint-space positions
+  joint_.setCommand( torques_ ); 
+
+  
   }
 
 
