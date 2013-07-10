@@ -1,14 +1,19 @@
 <launch>
 
-  <!-- Robot Model & Kinematics-->
-  <!--param name="robot_description" command="$(find xacro)/xacro.py '$(find barrett_model)/robots/wam_7dof_$(arg robot_name).urdf.xacro'--> 
-  <param name="robot_description" command="$(find xacro)/xacro.py '$(find irk_simulation)/model/master_console_gazebo.urdf.xacro'"/>
-  <param name="root_link" value="mtm_right_top_panel"/>
-  <param name="tip_link" value="mtm_right_wrist_roll_link"/>
+  <!-- Left MTM -->
+  <group ns="right_mtm" >
+    <!-- Call a python script to the run a service call to gazebo_ros to spawn a URDF robot -->
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+                 args="-urdf -model master_console -param robot_description"/>
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find irk_simulation)/model/master_console_gazebo.urdf.xacro'"/>
+    <param name="root_link" value="mtm_right_top_panel"/>
+    <param name="tip_link" value="mtm_right_wrist_roll_link"/>
+    <!-- Create a state publisher to broadcast TF frames -->
+    <node name="right_robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 
-  <param name="root_link" value="mtm_left_top_panel"/>
-  <param name="tip_link" value="mtm_left_wrist_roll_link"/>
-</rosparam>
+</group>
+
+
 </launch>
 
 

@@ -94,6 +94,7 @@ bool GravityCompensation::startHook()
 
 void GravityCompensation::updateHook()
 {
+  static int warning = 0 ;
   // Read in the current joint positions & velocities
   positions_in_port_.readNewest( positions_ );
 
@@ -103,17 +104,16 @@ void GravityCompensation::updateHook()
   // forces/torques and gravity.
   if(id_solver_->CartToJnt( positions_.q,  positions_.qdot, accelerations_, ext_wrenches_,
         torques_) != 0)
-       {
-       ROS_ERROR("Could not compute joint torques!");
-        }
+  {
+    ROS_ERROR("Could not compute joint torques!");
+  }
 
   // Send joint positions
   torques_out_port_.write( torques_ );
-
-  //Set the joint-space positions
-  joint_.setCommand( torques_ ); 
-
-  
+  for (unsigned int i=0; i<n_dof_; i++)
+  {
+    //Set the torques
+    joint_.setCommand( torques_(i) ); 
   }
 
 
