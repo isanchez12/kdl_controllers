@@ -8,7 +8,7 @@ project(kdl_controllers)
 # Do setup in case of ros package, If ROS_ROOT is set, it is
 # recommended to use RTT/OCL through the ros packages.
 #
-find_package(catkin COMPONENTS hardware_interface kdl_urdf_tools terse_roscpp controller_manager
+find_package(catkin COMPONENTS hardware_interface kdl_urdf_tools controller_manager
        control_toolbox rospy xenomai_ros)
 
 
@@ -39,7 +39,7 @@ generate_messages(
   )
 
 catkin_package(
-  DEPENDS hardware_interface irk_simulation irk_model kdl_urdf_tools terse_roscpp controller_manager control_toolbox rospy
+  DEPENDS hardware_interface irk_simulation irk_model kdl_urdf_tools controller_manager control_toolbox rospy
   CATKIN_DEPENDS # TODO
   INCLUDE_DIRS # TODO include
   LIBRARIES # TODO

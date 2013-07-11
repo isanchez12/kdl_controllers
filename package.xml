@@ -12,42 +12,45 @@
 
   <author>Ish Sanchez</author>
 
- <build_depend>kdl</build_depend> 
-   <build_depend>kdl_parser</build_depend> 
-   <build_depend>rtt</build_depend> 
-   <build_depend>rtt_rosnode</build_depend> 
-   <build_depend>std_msgs</build_depend> 
-   <build_depend>sensor_msgs</build_depend> 
-   <build_depend>rtt_cartesian_trajectory_msgs</build_depend> 
-   <build_depend>rtt_controllerman_msgs</build_depend> 
-   <build_depend>geometry_msgs</build_depend> 
-   <build_depend>trajectory_msgs</build_depend> 
-   <build_depend>tf</build_depend> 
-   <build_depend>tf_conversions</build_depend> 
-   <build_depend>angles</build_depend> 
-   <build_depend>cartesian_trajectory_msgs</build_depend> 
-   <build_depend>rtt_ros_tools</build_depend> 
-   <build_depend>kdl_urdf_tools</build_depend> 
-   
-   <run_depend>kdl</run_depend> 
-   <run_depend>kdl_parser</run_depend> 
-   <run_depend>rtt</run_depend> 
-   <run_depend>rtt_rosnode</run_depend> 
-   <run_depend>std_msgs</run_depend> 
-   <run_depend>sensor_msgs</run_depend> 
-   <run_depend>rtt_cartesian_trajectory_msgs</run_depend> 
-   <run_depend>rtt_controllerman_msgs</run_depend> 
-   <run_depend>geometry_msgs</run_depend> 
-   <run_depend>trajectory_msgs</run_depend> 
-   <run_depend>tf</run_depend> 
-   <run_depend>tf_conversions</run_depend> 
-   <run_depend>angles</run_depend> 
-   <run_depend>cartesian_trajectory_msgs</run_depend> 
-   <run_depend>rtt_ros_tools</run_depend> 
-   <run_depend>kdl_urdf_tools</run_depend> 
-   
-   <!-- <test_depend>kdl</test_depend> --> 
-   <!-- <test_depend>kdl_parser</test_depend>--> 
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>kdl</build_depend> 
+  <build_depend>kdl_parser</build_depend> 
+  <build_depend>rtt</build_depend> 
+  <build_depend>rtt_rosnode</build_depend> 
+  <build_depend>std_msgs</build_depend> 
+  <build_depend>sensor_msgs</build_depend> 
+  <build_depend>rtt_cartesian_trajectory_msgs</build_depend> 
+  <build_depend>rtt_controllerman_msgs</build_depend> 
+  <build_depend>geometry_msgs</build_depend> 
+  <build_depend>trajectory_msgs</build_depend> 
+  <build_depend>tf</build_depend> 
+  <build_depend>tf_conversions</build_depend> 
+  <build_depend>angles</build_depend> 
+  <build_depend>cartesian_trajectory_msgs</build_depend> 
+  <build_depend>rtt_ros_tools</build_depend> 
+  <build_depend>kdl_urdf_tools</build_depend> 
+  <build_depend>orocos_kdl</build_depend>
+
+  <run_depend>kdl</run_depend> 
+  <run_depend>kdl_parser</run_depend> 
+  <run_depend>rtt</run_depend> 
+  <run_depend>rtt_rosnode</run_depend> 
+  <run_depend>std_msgs</run_depend> 
+  <run_depend>sensor_msgs</run_depend> 
+  <run_depend>rtt_cartesian_trajectory_msgs</run_depend> 
+  <run_depend>rtt_controllerman_msgs</run_depend> 
+  <run_depend>geometry_msgs</run_depend> 
+  <run_depend>trajectory_msgs</run_depend> 
+  <run_depend>tf</run_depend> 
+  <run_depend>tf_conversions</run_depend> 
+  <run_depend>angles</run_depend> 
+  <run_depend>cartesian_trajectory_msgs</run_depend> 
+  <run_depend>rtt_ros_tools</run_depend> 
+  <run_depend>kdl_urdf_tools</run_depend> 
+
+  <!-- <test_depend>kdl</test_depend> --> 
+  <!-- <test_depend>kdl_parser</test_depend>--> 
    <!-- <test_depend>rtt</test_depend> -->
    <!-- <test_depend>rtt_rosnode</test_depend> -->
    <!-- <test_depend>std_msgs</test_depend> -->
@@ -65,6 +68,8 @@
 
 
   <export>
-
+     <controller_interface plugin="${prefix}/kdl_controller_plugins.xml"/>
   </export>
+
+
 </package>

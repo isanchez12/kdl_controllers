@@ -9,14 +9,14 @@
 
 #include <rtt_ros_tools/tools.h>
 #include <kdl_urdf_tools/tools.h>
-#include <controllerman_controllers/controllers/gravity_compensation.h>
+#include <kdl_controllers/controllers/inverse_dynamics_controller.h>
 
 #include <effort_controllers/joint_position_controller.h>
 
 
-using namespace controllerman_controllers::controllers;
+using namespace kdl_controllers::controllers;
 
-GravityCompensation::GravityCompensation(std::string const& name) :
+InverseDynamicsController::InverseDynamicsController(std::string const& name) :
   TaskContext(name)
   // Properties
   ,robot_description_("")
@@ -54,7 +54,7 @@ GravityCompensation::GravityCompensation(std::string const& name) :
   rtt_ros_tools::load_rosparam_and_refresh(this);
 }
 
-bool GravityCompensation::configureHook()
+bool InverseDynamicsController::configureHook()
 {
   // Initialize kinematics (KDL tree, KDL chain, and #DOF)
   urdf::Model urdf_model;
@@ -87,12 +87,12 @@ bool GravityCompensation::configureHook()
   return true;
 }
 
-bool GravityCompensation::startHook()
+bool InverseDynamicsController::startHook()
 {
   return true;
 }
 
-void GravityCompensation::updateHook()
+void InverseDynamicsController::updateHook()
 {
   static int warning = 0 ;
   // Read in the current joint positions & velocities
@@ -107,22 +107,22 @@ void GravityCompensation::updateHook()
   {
     ROS_ERROR("Could not compute joint torques!");
   }
+  
+  // Send joint torques 
+    torques_out_port_.write( torques_ );
+  
 
-  // Send joint positions
-  torques_out_port_.write( torques_ );
-  for (unsigned int i=0; i<n_dof_; i++)
+  for (unsigned int i = 0 ; i < kdl_chain_.getNrOfJoints() ; i++) 
   {
-    //Set the torques
-    joint_.setCommand( torques_(i) ); 
+     joint_.setCommand( torques_(i) ); 
   }
-
 
 }
 
-void GravityCompensation::stopHook()
+void InverseDynamicsController::stopHook()
 {
 }
 
-void GravityCompensation::cleanupHook()
+void InverseDynamicsController::cleanupHook()
 {
 }
