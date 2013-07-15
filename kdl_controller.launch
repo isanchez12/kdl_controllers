@@ -1,0 +1,7 @@
+<launch>
+  <!-- load configuration -->
+  <rosparam command="load" file="$(find kdl_controller)/kdl_controller.yaml" />
+
+  <!-- spawn controller -->
+  <node name="kdl_controller_spawner" pkg="controller_manager" type="spawner" output="screen" args="kdl_controller" />
+        </launch>

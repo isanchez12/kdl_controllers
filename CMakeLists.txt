@@ -8,12 +8,8 @@ project(kdl_controllers)
 # Do setup in case of ros package, If ROS_ROOT is set, it is
 # recommended to use RTT/OCL through the ros packages.
 #
-find_package(catkin COMPONENTS hardware_interface kdl_urdf_tools controller_manager
-       control_toolbox rospy xenomai_ros)
-
-
-if (Xenomai_FOUND)
-  include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} )
+find_package(catkin REQUIRED COMPONENTS hardware_interface kdl_urdf_tools controller_manager
+  control_toolbox rospy urdf controller_interface)
 
 # Set the CMAKE_PREFIX_PATH in case you're not using Orocos through ROS
 # for helping these find commands find RTT.
@@ -24,28 +20,32 @@ include_directories(${EIGEN_INCLUDE_DIRS})
 add_definitions(${EIGEN_DEFINITIONS})
 
 # Add xenomai flags
-add_xenomai_flags()
 
-add_library(kdl_controllers src/inverse_dynamics_controller.cpp
-             include/irk_controllers/controllers/inverse_dynamics_controller.h)
-
-#add_definitions(-D__XENO__)
-#--------add_executable(wam_server src/wam_server.cpp)
-target_link_libraries(wam_server xenomai native rtdm kdl_controller)
-
-## Generate added messages and services with any dependencies listed here
-generate_messages(
-  #TODO DEPENDENCIES geometry_msgs std_msgs
+add_library(${PROJECT_NAME}
+  src/controllers/inverse_dynamics_controller.cpp include/controllers/inverse_dynamics_controller.h
   )
 
+## Generate added messages and services with any dependencies listed here
+
 catkin_package(
-  DEPENDS hardware_interface irk_simulation irk_model kdl_urdf_tools controller_manager control_toolbox rospy
+  DEPENDS hardware_interface urdf irk_simulation irk_model kdl_urdf_tools controller_manager control_toolbox rospy
   CATKIN_DEPENDS # TODO
   INCLUDE_DIRS # TODO include
   LIBRARIES # TODO
   )
 
-endif()
+
+# Install
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
+
+
 #-----------------------------------------------------------
 
 # Defines the orocos_* cmake macros. See that file for additional
