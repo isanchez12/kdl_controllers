@@ -36,29 +36,6 @@
 #ifndef KDL_CONTROLLERS_INVERSE_DYNAMICS_CONTROLLER_H
 #define KDL_CONTROLLERS_INVERSE_DYNAMICS_CONTROLLER_H
 
-/**
-  @class kdl_controllers::InverseDynamicsController
-  @brief Joint Position Controller
-
-  This class controls positon using a pid loop.
-
-  @section ROS ROS interface
-
-  @param type Must be "kdl_controllers::InverseDynamicsController"
-  @param joint Name of the joint to control.
-  @param pid Contains the gains for the PID loop around position.  See: control_toolbox::Pid
-
-  Subscribes to:
-
-  - @b command (std_msgs::Float64) : The joint position to achieve.
-
-Publishes:
-
-- @b state (controllers_msgs::JointControllerState) :
-Current state of the controller, including pid error and gains.
-
-*/
-
 #include <ros/node_handle.h>
 #include <urdf/model.h>
 #include <control_toolbox/pid.h>
@@ -96,9 +73,7 @@ namespace kdl_controllers
 
     void starting(const ros::Time& time);
 
-    /*!
-     *    * \brief Issues commands to the joint. Should be called at regular intervals
-     *       */
+    /*!  brief Issues commands to the joint. Should be called at regular intervals    */
     void update(const ros::Time& time, const ros::Duration& period);
 
     void getGains(double &p, double &i, double &d, double &i_max, double &i_min);

@@ -32,25 +32,22 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#include <iostream>
-#include <map>
+//#include <iostream>
+//#include <map>
 
-#include <Eigen/Dense>
+//#include <Eigen/Dense>
 
-#include <kdl/tree.hpp>
+//#include <kdl/tree.hpp>
 
-#include <kdl_parser/kdl_parser.hpp>
+//#include <kdl_parser/kdl_parser.hpp>
 
-#include <rtt_ros_tools/tools.h>
-#include <kdl_urdf_tools/tools.h>
-
-#include <kdl_controllers/inverse_dynamics_controller.h>
+#include <controllers/inverse_dynamics_controller.h>
 #include <angles/angles.h>
 #include <pluginlib/class_list_macros.h>
 
 namespace kdl_controllers  {
 
-  InverseDynamicsController::InverseDynamicsController()
+ InverseDynamicsController::InverseDynamicsController()
     : loop_count_(0)
   {}
 
@@ -99,12 +96,12 @@ namespace kdl_controllers  {
 
   void InverseDynamicsController::setGains(const double &p, const double &i, const double &d, const double &i_max, const double &i_min)
   {
-   // pid_controller_.setGains(p,i,d,i_max,i_min);
+     pid_controller_.setGains(p,i,d,i_max,i_min);
   }
 
   void InverseDynamicsController::getGains(double &p, double &i, double &d, double &i_max, double &i_min)
   {
-  //pid_controller_.getGains(p,i,d,i_max,i_min);
+     pid_controller_.getGains(p,i,d,i_max,i_min);
   }
 
   std::string InverseDynamicsController::getJointName()
@@ -159,13 +156,13 @@ namespace kdl_controllers  {
     // Set the PID error and compute the PID command with nonuniform
     // time step size. This also allows the user to pass in a precomputed derivative error. 
     double commanded_effort = pid_controller_.computeCommand(error, vel_error, period); 
-    joint_.setCommand(commanded_effort);
+    joint_.setCommand( commanded_effort );
 
-    //Set the computed torque from the gravity compensation library
-    for (unsigned int i = 0 ; i < kdl_chain_.getNrOfJoints() ; i++) 
-    {
-      joint_.setCommand( torques_(i) );  
-    }
+    ////Set the computed torque from the gravity compensation library
+    //for (unsigned int i = 0 ; i < kdl_chain_.getNrOfJoints() ; i++) 
+    //{
+      //joint_.setCommand( torques_(i) );  
+    //}
   }
 
   void InverseDynamicsController::setCommandCB(const std_msgs::Float64ConstPtr& msg)

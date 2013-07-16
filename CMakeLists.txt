@@ -1,22 +1,22 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(kdl_controllers)
 
-find_package(catkin REQUIRED COMPONENTS hardware_interface kdl_urdf_tools controller_manager
-  control_toolbox rospy urdf controller_interface)
+find_package(catkin REQUIRED COMPONENTS controllers_msgs realtime_tools
+  control_toolbox urdf controller_interface forward_command_controller)
 
 find_package(Eigen REQUIRED)
-include_directories(${EIGEN_INCLUDE_DIRS})
+include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS})
 add_definitions(${EIGEN_DEFINITIONS})
 
-add_library(${PROJECT_NAME}
-  src/inverse_dynamics_controller.cpp include/inverse_dynamics_controller.h
+add_library( ${PROJECT_NAME}
+  src/inverse_dynamics_controller.cpp include/controllers/inverse_dynamics_controller.h
   )
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 catkin_package(
-  DEPENDS hardware_interface urdf irk_simulation irk_model kdl_urdf_tools controller_manager control_toolbox rospy
-  CATKIN_DEPENDS # TODO
-  INCLUDE_DIRS # TODO include
-  LIBRARIES # TODO
+  CATKIN_DEPENDS control_toolbox forward_command_controller controllers_msgs urdf controller_interface realtime_tools 
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
   )
 
 
