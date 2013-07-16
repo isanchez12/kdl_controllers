@@ -44,7 +44,7 @@
 #include <rtt_ros_tools/tools.h>
 #include <kdl_urdf_tools/tools.h>
 
-#include <kdl_controllers/controllers/inverse_dynamics_controller.h>
+#include <kdl_controllers/inverse_dynamics_controller.h>
 #include <angles/angles.h>
 #include <pluginlib/class_list_macros.h>
 
@@ -99,12 +99,12 @@ namespace kdl_controllers  {
 
   void InverseDynamicsController::setGains(const double &p, const double &i, const double &d, const double &i_max, const double &i_min)
   {
-    pid_controller_.setGains(p,i,d,i_max,i_min);
+   // pid_controller_.setGains(p,i,d,i_max,i_min);
   }
 
   void InverseDynamicsController::getGains(double &p, double &i, double &d, double &i_max, double &i_min)
   {
-    pid_controller_.getGains(p,i,d,i_max,i_min);
+  //pid_controller_.getGains(p,i,d,i_max,i_min);
   }
 
   std::string InverseDynamicsController::getJointName()

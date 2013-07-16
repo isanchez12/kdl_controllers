@@ -1,5 +1,0 @@
-<launch>
-  <param name="robot_description" command="$(find xacro)/xacro.py '$(find irk_simulation)/model/master_console_gazebo.urdf.xacro'"/>
-  <param name="root_link" value="mtm_right_top_panel"/>
-  <param name="tip_link" value="mtm_right_wrist_roll_link"/>
-</launch>

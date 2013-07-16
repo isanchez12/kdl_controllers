@@ -96,9 +96,7 @@ namespace kdl_controllers
 
     void starting(const ros::Time& time);
 
-    /*!
-     *    * \brief Issues commands to the joint. Should be called at regular intervals
-     *       */
+    /*!  brief Issues commands to the joint. Should be called at regular intervals    */
     void update(const ros::Time& time, const ros::Duration& period);
 
     void getGains(double &p, double &i, double &d, double &i_max, double &i_min);
