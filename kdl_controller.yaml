@@ -1,0 +1,3 @@
+inverse_dynamics_controller:
+    type: controllers/InverseDynamicsController
+    publish_rate: 50

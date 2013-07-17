@@ -47,9 +47,42 @@
 
 namespace kdl_controllers  {
 
- InverseDynamicsController::InverseDynamicsController()
-    : loop_count_(0)
-  {}
+  InverseDynamicsController::InverseDynamicsController(std::string const& name ) : 
+    TaskContext(name)
+    //Properties
+    ,loop_count_(0)
+    ,robot_description_("")
+    ,root_link_("")
+    ,tip_link_("")
+    ,gravity_(3,0.0)
+    // Working variables
+    ,n_dof_(0)
+    ,kdl_tree_()
+    ,kdl_chain_()
+    ,id_solver_(NULL)
+    ,positions_()
+    ,torques_()
+  { 
+  
+    // Declare properties
+    this->addProperty("robot_description",robot_description_)
+      .doc("The WAM URDF xml string.");
+    this->addProperty("gravity",gravity_)
+      .doc("The gravity vector in the root link frame.");
+    this->addProperty("root_link",root_link_)
+      .doc("The root link for the controller.");
+    this->addProperty("tip_link",tip_link_)
+      .doc("The tip link for the controller.");
+    // Configure data ports
+    this->ports()->addEventPort("positions_in", positions_in_port_)
+      .doc("Input port: nx1 vector of joint positions. (n joints)");
+    this->ports()->addPort("torques_out", torques_out_port_)
+      .doc("Output port: nx1 vector of joint torques. (n joints)");
+
+    // Initialize properties from rosparam
+    rtt_ros_tools::load_rosparam_and_refresh(this);
+  
+  }
 
   InverseDynamicsController::~InverseDynamicsController()
   {
@@ -92,8 +125,7 @@ namespace kdl_controllers  {
 
     return init(robot, joint_name, pid);
   }
-
-
+  
   void InverseDynamicsController::setGains(const double &p, const double &i, const double &d, const double &i_max, const double &i_min)
   {
      pid_controller_.setGains(p,i,d,i_max,i_min);
@@ -123,6 +155,27 @@ namespace kdl_controllers  {
   {
     command_.initRT(joint_.getPosition());
     pid_controller_.reset();
+//*****************modified code **************************************
+    // Initialize kinematics (KDL tree, KDL chain, and #DOF)
+    urdf::Model urdf_model;
+    if(!kdl_urdf_tools::initialize_kinematics_from_urdf(
+          robot_description_, root_link_, tip_link_,
+          n_dof_, kdl_chain_, kdl_tree_, urdf_model))
+    {
+      ROS_ERROR("Could not initialize robot kinematics!");
+      return false;
+    }
+    // Create inverse dynamics chainsolver
+    id_solver_.reset(
+        new KDL::ChainIdSolver_RNE(
+          kdl_chain_,
+          KDL::Vector(gravity_[0],gravity_[1],gravity_[2])));
+    // Resize working vectors
+    positions_.resize(n_dof_);
+    accelerations_.resize(n_dof_);
+    torques_.resize(n_dof_);
+    ext_wrenches_.resize(kdl_chain_.getNrOfSegments());
+  
   }
 
 
@@ -158,11 +211,42 @@ namespace kdl_controllers  {
     double commanded_effort = pid_controller_.computeCommand(error, vel_error, period); 
     joint_.setCommand( commanded_effort );
 
-    //for (unsigned int i = 0 ; i < n_joints_ ; i++) 
+    //**************************modified code *******************************8
+    //
+    ////Set the computed torque from the gravity compensation library
+    //for (unsigned int i = 0 ; i < kdl_chain_.getNrOfJoints() ; i++) 
     //{
-     //// joint_handles_[i].setCommand( torques_
       //joint_.setCommand( torques_(i) );  
     //}
+   
+    // Read in the current joint positions & velocities
+    positions_in_port_.readNewest( positions_ );
+
+    // Compute inverse dynamics
+    // This computes the torques on each joint of the arm as a function of
+    // the arm's joint-space position, velocities, accelerations, external
+    // forces/torques and gravity.
+    if(id_solver_->CartToJnt(
+          positions_.q,
+          positions_.qdot,
+      //  accelerations_,
+          ext_wrenches_,
+          torques_) != 0)
+
+    for( unsigned int i=0; i <numJoints.get(); i++)
+    {
+       jntarr(i) = JointPoses.Get()[i];
+       if (iksolver -> CartToJnt( jntarr, DesiredTwist.Get(), qdot) >= 0)
+       {
+         for( unsigned int i=0; i <numJoints.get(); i++)
+         {
+            v[i] = qdot(i);
+            JointVelocities.Set(v);
+         }
+       }
+    }
+
+
   }
 
   void InverseDynamicsController::setCommandCB(const std_msgs::Float64ConstPtr& msg)
