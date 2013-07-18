@@ -5,7 +5,7 @@
  *  Copyright (c) 2013 Johns Hopkins University
  *  All rights reserved.
  *
- *  Redistribution and use in source and binary forms, with or without
+ *  edistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
  *  are met:
  *
@@ -32,14 +32,6 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-//#include <iostream>
-//#include <map>
-
-//#include <Eigen/Dense>
-
-//#include <kdl/tree.hpp>
-
-//#include <kdl_parser/kdl_parser.hpp>
 
 #include <controllers/inverse_dynamics_controller.h>
 #include <angles/angles.h>
@@ -47,42 +39,9 @@
 
 namespace kdl_controllers  {
 
-  InverseDynamicsController::InverseDynamicsController(std::string const& name ) : 
-    TaskContext(name)
-    //Properties
-    ,loop_count_(0)
-    ,robot_description_("")
-    ,root_link_("")
-    ,tip_link_("")
-    ,gravity_(3,0.0)
-    // Working variables
-    ,n_dof_(0)
-    ,kdl_tree_()
-    ,kdl_chain_()
-    ,id_solver_(NULL)
-    ,positions_()
-    ,torques_()
-  { 
-  
-    // Declare properties
-    this->addProperty("robot_description",robot_description_)
-      .doc("The WAM URDF xml string.");
-    this->addProperty("gravity",gravity_)
-      .doc("The gravity vector in the root link frame.");
-    this->addProperty("root_link",root_link_)
-      .doc("The root link for the controller.");
-    this->addProperty("tip_link",tip_link_)
-      .doc("The tip link for the controller.");
-    // Configure data ports
-    this->ports()->addEventPort("positions_in", positions_in_port_)
-      .doc("Input port: nx1 vector of joint positions. (n joints)");
-    this->ports()->addPort("torques_out", torques_out_port_)
-      .doc("Output port: nx1 vector of joint torques. (n joints)");
-
-    // Initialize properties from rosparam
-    rtt_ros_tools::load_rosparam_and_refresh(this);
-  
-  }
+  InverseDynamicsController::InverseDynamicsController() : 
+    loop_count_(0)
+  { }
 
   InverseDynamicsController::~InverseDynamicsController()
   {
@@ -117,13 +76,40 @@ namespace kdl_controllers  {
       ROS_ERROR("No joint given (namespace: %s)", n.getNamespace().c_str());
       return false;
     }
+  
+    std::string root_link;
+    if(!n.getParam("root_link", root_link)) {
+      ROS_ERROR("No root_link given (namespace:%s)", n.getNamespace().c_str());
+      return false;
+    }
+
+    std::string tip_link;
+    if(!n.getParam("tip_link", tip_link)) {
+      ROS_ERROR("No tip_link given (namespace:%s)", n.getNamespace().c_str());
+      return false;
+    }   
 
     control_toolbox::Pid pid;
     if (!pid.init(ros::NodeHandle(n, "pid")))
       return false;
+    //********************modified code  ******************************
+    if (!chain_.init(robot, root_link, tip_link))
+    {
+      ROS_ERROR("MyCartController could not use the chain from '%s' to '%s'",
+                root_link.c_str(), tip_link.c_str());
+      return false;
+    }
 
+    chain_.toKDL(kdl_chain_);
+    jnt_to_pose_solver_.reset(new KDL::ChainFkSolverPos_recursive(kdl_chain_));
 
-    return init(robot, joint_name, pid);
+    //resize the vars in non-realtime
+    q_.resize(kdl_chain_.getNrOfJoints());
+    q0_.resize(kdl_chain_.getNrOfJoints());
+    qdot_.resize(kdl_chain_.getNrOfJoints());
+
+  //  return init(robot, joint_name, pid);
+     return true;
   }
   
   void InverseDynamicsController::setGains(const double &p, const double &i, const double &d, const double &i_max, const double &i_min)
@@ -150,32 +136,26 @@ namespace kdl_controllers  {
     command_.writeFromNonRT(cmd);
   }
 
-
   void InverseDynamicsController::starting(const ros::Time& time) 
   {
     command_.initRT(joint_.getPosition());
     pid_controller_.reset();
-//*****************modified code **************************************
-    // Initialize kinematics (KDL tree, KDL chain, and #DOF)
-    urdf::Model urdf_model;
+////*****************modified code **************************************
+   /* // Initialize kinematics (KDL tree, KDL chain, and #DOF)
     if(!kdl_urdf_tools::initialize_kinematics_from_urdf(
           robot_description_, root_link_, tip_link_,
-          n_dof_, kdl_chain_, kdl_tree_, urdf_model))
-    {
+          n_dof_, kdl_chain_, kdl_tree_, urdf))
+     {
       ROS_ERROR("Could not initialize robot kinematics!");
-      return false;
-    }
+      //return false;
+      }
+
     // Create inverse dynamics chainsolver
-    id_solver_.reset(
+     id_solver_.reset(
         new KDL::ChainIdSolver_RNE(
-          kdl_chain_,
-          KDL::Vector(gravity_[0],gravity_[1],gravity_[2])));
-    // Resize working vectors
-    positions_.resize(n_dof_);
-    accelerations_.resize(n_dof_);
-    torques_.resize(n_dof_);
-    ext_wrenches_.resize(kdl_chain_.getNrOfSegments());
-  
+           kdl_chain_,
+           KDL::Vector(gravity_[0],gravity_[1],gravity_[2])));
+  */
   }
 
 
@@ -210,15 +190,25 @@ namespace kdl_controllers  {
     // time step size. This also allows the user to pass in a precomputed derivative error. 
     double commanded_effort = pid_controller_.computeCommand(error, vel_error, period); 
     joint_.setCommand( commanded_effort );
+     
+/**
+   // **************************modified code *******************************8
+    KDL::JntArray q_;     //joint positions
+    KDL::JntArray q0_;    //joint initial positions
+    KDL::JntArray qdot_;  //Joint velocities
 
-    //**************************modified code *******************************8
-    //
+
+    //Get the current Joint positions and velocities
+     chain_.getPositions(q_);
+     chain_.getVelocities(qdot_);
+*/  
     ////Set the computed torque from the gravity compensation library
     //for (unsigned int i = 0 ; i < kdl_chain_.getNrOfJoints() ; i++) 
     //{
       //joint_.setCommand( torques_(i) );  
     //}
-   
+  
+  /*
     // Read in the current joint positions & velocities
     positions_in_port_.readNewest( positions_ );
 
@@ -227,24 +217,24 @@ namespace kdl_controllers  {
     // the arm's joint-space position, velocities, accelerations, external
     // forces/torques and gravity.
     if(id_solver_->CartToJnt(
-          positions_.q,
+            positions_.q,
           positions_.qdot,
-      //  accelerations_,
+        //  accelerations_,
           ext_wrenches_,
           torques_) != 0)
-
-    for( unsigned int i=0; i <numJoints.get(); i++)
-    {
-       jntarr(i) = JointPoses.Get()[i];
-       if (iksolver -> CartToJnt( jntarr, DesiredTwist.Get(), qdot) >= 0)
-       {
-         for( unsigned int i=0; i <numJoints.get(); i++)
-         {
-            v[i] = qdot(i);
-            JointVelocities.Set(v);
-         }
-       }
-    }
+*/
+    //for( unsigned int i=0; i <numJoints.get(); i++)
+    //{
+       //jntarr(i) = JointPoses.Get()[i];
+       //if (iksolver -> CartToJnt( jntarr, DesiredTwist.Get(), qdot) >= 0)
+       //{
+         //for( unsigned int i=0; i <numJoints.get(); i++)
+         //{
+            //v[i] = qdot(i);
+            //JointVelocities.Set(v);
+         //}
+       //}
+    //}
 
 
   }

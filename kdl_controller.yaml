@@ -1,3 +1,6 @@
 inverse_dynamics_controller:
-    type: controllers/InverseDynamicsController
-    publish_rate: 50
+   type: kdl_controllers/InverseDynamicsController
+   robot_description:  mtm.urdf.xacro 
+   root_link: mtm_right_top_panel
+   tip_link: mtm_right_wrist_roll_link
+

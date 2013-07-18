@@ -57,10 +57,9 @@ namespace kdl_controllers  {
   }
 
   bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *robot, 
-      const std::string &joint_name, const control_toolbox::Pid &pid)
+      const std::string &joint_name)
   {
     joint_ = robot->getHandle(joint_name);
-    pid_controller_ = pid;
 
     // get urdf info about joint
     urdf::Model urdf;
@@ -84,25 +83,21 @@ namespace kdl_controllers  {
       ROS_ERROR("No joint given (namespace: %s)", n.getNamespace().c_str());
       return false;
     }
-
-    control_toolbox::Pid pid;
-    if (!pid.init(ros::NodeHandle(n, "pid")))
-      return false;
-
-
-    return init(robot, joint_name, pid);
+    
+    return init(robot, joint_name);
   }
 
-
+/*
   void InverseDynamicsController::setGains(const double &p, const double &i, const double &d, const double &i_max, const double &i_min)
   {
-     pid_controller_.setGains(p,i,d,i_max,i_min);
+      pid_controller_.setGains(p,i,d,i_max,i_min);
   }
 
   void InverseDynamicsController::getGains(double &p, double &i, double &d, double &i_max, double &i_min)
   {
      pid_controller_.getGains(p,i,d,i_max,i_min);
   }
+*/
 
   std::string InverseDynamicsController::getJointName()
   {
@@ -122,7 +117,6 @@ namespace kdl_controllers  {
   void InverseDynamicsController::starting(const ros::Time& time) 
   {
     command_.initRT(joint_.getPosition());
-    pid_controller_.reset();
   }
 
 
@@ -155,8 +149,8 @@ namespace kdl_controllers  {
 
     // Set the PID error and compute the PID command with nonuniform
     // time step size. This also allows the user to pass in a precomputed derivative error. 
-    double commanded_effort = pid_controller_.computeCommand(error, vel_error, period); 
-    joint_.setCommand( commanded_effort );
+//    double commanded_effort = pid_controller_.computeCommand(error, vel_error, period); 
+  //  joint_.setCommand( commanded_effort );
 
     //for (unsigned int i = 0 ; i < n_joints_ ; i++) 
     //{

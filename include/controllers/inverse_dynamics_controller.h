@@ -36,10 +36,12 @@
 #ifndef KDL_CONTROLLERS_INVERSE_DYNAMICS_CONTROLLER_H
 #define KDL_CONTROLLERS_INVERSE_DYNAMICS_CONTROLLER_H
 
+#include <iostream>
+
 #include <ros/node_handle.h>
 #include <urdf/model.h>
-#include <control_toolbox/pid.h>
-#include <control_toolbox/pid_gains_setter.h>
+//#include <control_toolbox/pid.h>
+//#include <control_toolbox/pid_gains_setter.h>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/condition.hpp>
 #include <realtime_tools/realtime_publisher.h>
@@ -50,6 +52,11 @@
 #include <controllers_msgs/JointControllerState.h>
 #include <realtime_tools/realtime_buffer.h>
 
+#include <boost/scoped_ptr.hpp>
+#include <kdl/chain.hpp>
+#include <kdl/chainfksolverpos_recursive.hpp>
+#include <kdl/chainjnttojacsolver.hpp>
+#include <kdl/jntarray.hpp>
 
 namespace kdl_controllers
 {
@@ -61,7 +68,7 @@ namespace kdl_controllers
     InverseDynamicsController();
     ~InverseDynamicsController();
 
-    bool init(hardware_interface::EffortJointInterface*robot, const std::string &joint_name,const control_toolbox::Pid &pid);
+    bool init(hardware_interface::EffortJointInterface*robot, const std::string &joint_name);
     bool init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n);
 
     /*!
@@ -86,7 +93,7 @@ namespace kdl_controllers
 
   private:
     int loop_count_;
-    control_toolbox::Pid pid_controller_;       /**< Internal PID controller. */
+//    control_toolbox::Pid pid_controller_;       /**< Internal PID controller. */
 
     boost::scoped_ptr<
       realtime_tools::RealtimePublisher<
@@ -94,12 +101,18 @@ namespace kdl_controllers
 
     ros::Subscriber sub_command_;
     void setCommandCB(const std_msgs::Float64ConstPtr& msg);
+    /*
+    KDL::JntArray q_;     //joint positions
+    KDL::JntArray q0_;    //joint initial positions
+    KDL::JntArray qdot_;  //Joint velocities
+    KDL::Chain kdl_chain_;
+
+    // KDL Solvers performing the actual computations                                                                                                                               
+    boost::scoped_ptr<KDL::ChainFkSolverPos>    jnt_to_pose_solver_;
+    boost::scoped_ptr<KDL::ChainJntToJacSolver> jnt_to_jac_solver_;
+  */
   };
 
 } // namespace
-
 #endif
-
-
-
 
