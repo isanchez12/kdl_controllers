@@ -91,6 +91,8 @@ namespace kdl_controllers
     boost::shared_ptr<const urdf::Joint> joint_urdf_;
     realtime_tools::RealtimeBuffer<double> command_;             /**< Last commanded position. */
 
+   // boost::shared_ptr<const urdf::Link> root_link_urdf_;
+
   private:
     int loop_count_;
 //    control_toolbox::Pid pid_controller_;       /**< Internal PID controller. */

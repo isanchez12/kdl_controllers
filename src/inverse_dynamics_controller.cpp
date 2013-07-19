@@ -66,19 +66,28 @@ namespace kdl_controllers  {
     joint_ = robot->getHandle(joint_name);
 
     // get urdf info about joint
-    urdf::Model urdf;
-    if (!urdf.initParam("robot_description")){
+    urdf::Model urdf_model;
+    if (!urdf_model.initParam("robot_description")){
       ROS_ERROR("Failed to parse urdf file");
       return false;
     }
 
-    joint_urdf_ = urdf.getJoint(joint_name);
+    joint_urdf_ = urdf_model.getJoint(joint_name);
     if (!joint_urdf_){
       ROS_ERROR("Could not find joint '%s' in urdf", joint_name.c_str());
       return false;
     }
+   /* 
+    // get urdf info about root_link
+    root_link_ = robot ->getHandle(root_name);
+    root_link_urdf_ = urdf_model.getLink(root_name);
 
-    return true;
+    if(!root_link_urdf_){
+      ROS_ERROR("Could not find joint '%s' in urdf", root_name.c_str());
+      return false;
+    }
+     */                        
+   return true;
   }
 
   bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n)
