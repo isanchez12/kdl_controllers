@@ -45,6 +45,10 @@
 #include <angles/angles.h>
 #include <pluginlib/class_list_macros.h>
 
+std::string joint_name;
+std::string root_name;
+std::string tip_name;
+
 namespace kdl_controllers  {
 
  InverseDynamicsController::InverseDynamicsController()
@@ -67,6 +71,7 @@ namespace kdl_controllers  {
       ROS_ERROR("Failed to parse urdf file");
       return false;
     }
+
     joint_urdf_ = urdf.getJoint(joint_name);
     if (!joint_urdf_){
       ROS_ERROR("Could not find joint '%s' in urdf", joint_name.c_str());
@@ -78,12 +83,22 @@ namespace kdl_controllers  {
 
   bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n)
   {
-    std::string joint_name;
     if (!n.getParam("joint", joint_name)) {
       ROS_ERROR("No joint given (namespace: %s)", n.getNamespace().c_str());
       return false;
     }
-    
+  
+    if(!n.getParam("root_link", root_name)) {
+      ROS_ERROR("No root_link given (namespace:%s)", n.getNamespace().c_str());
+      return false;
+    }   
+
+    if(!n.getParam("tip_link", tip_name)) {
+      ROS_ERROR("No tip_link given (namespace:%s)", n.getNamespace().c_str());
+      return false;
+    }  
+
+
     return init(robot, joint_name);
   }
 
@@ -97,12 +112,21 @@ namespace kdl_controllers  {
   {
      pid_controller_.getGains(p,i,d,i_max,i_min);
   }
+
+  void InverseDynamicsController::setInverseDynValues()
+  {
+  }
+  void InverseDynamicsController::getInverseDyanValues()
+  {
+  }
+
 */
 
   std::string InverseDynamicsController::getJointName()
   {
     return joint_.getName();
   }
+
 
   // Set the joint position command
   void InverseDynamicsController::setCommand(double cmd)
@@ -124,33 +148,10 @@ namespace kdl_controllers  {
   {
     double command = *(command_.readFromRT());
 
-    double error, vel_error;
-
-    // Compute position error
-    if (joint_urdf_->type == urdf::Joint::REVOLUTE)
-    {
-      angles::shortest_angular_distance_with_limits(command,
-          joint_.getPosition(), 
-          joint_urdf_->limits->lower, 
-          joint_urdf_->limits->upper,
-          error);
-    }
-    else if (joint_urdf_->type == urdf::Joint::CONTINUOUS)
-    {
-      error = angles::shortest_angular_distance(command, joint_.getPosition());
-    }
-    else //prismatic
-    {
-      error = command - joint_.getPosition();
-    }
-
-    // Compute velocity error assuming desired velocity is 0
-    vel_error = 0.0 - joint_.getVelocity();
-
     // Set the PID error and compute the PID command with nonuniform
     // time step size. This also allows the user to pass in a precomputed derivative error. 
 //    double commanded_effort = pid_controller_.computeCommand(error, vel_error, period); 
-  //  joint_.setCommand( commanded_effort );
+  //  joint_.setCommand( torques_ );
 
     //for (unsigned int i = 0 ; i < n_joints_ ; i++) 
     //{
