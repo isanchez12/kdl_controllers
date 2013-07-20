@@ -68,7 +68,8 @@ namespace kdl_controllers
     InverseDynamicsController();
     ~InverseDynamicsController();
 
-    bool init(hardware_interface::EffortJointInterface*robot, const std::string &joint_name);
+    bool init(hardware_interface::EffortJointInterface*robot, const std::string &joint_name
+                                                              , const std::string &root_link_name);
     bool init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n);
 
     /*!
@@ -91,7 +92,7 @@ namespace kdl_controllers
     boost::shared_ptr<const urdf::Joint> joint_urdf_;
     realtime_tools::RealtimeBuffer<double> command_;             /**< Last commanded position. */
 
-   // boost::shared_ptr<const urdf::Link> root_link_urdf_;
+    boost::shared_ptr<const urdf::Link> root_link_urdf_;
 
   private:
     int loop_count_;

@@ -45,9 +45,6 @@
 #include <angles/angles.h>
 #include <pluginlib/class_list_macros.h>
 
-std::string joint_name;
-std::string root_name;
-std::string tip_name;
 
 namespace kdl_controllers  {
 
@@ -61,7 +58,7 @@ namespace kdl_controllers  {
   }
 
   bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *robot, 
-      const std::string &joint_name)
+      const std::string &joint_name, const std::string &root_link)
   {
     joint_ = robot->getHandle(joint_name);
 
@@ -77,13 +74,16 @@ namespace kdl_controllers  {
       ROS_ERROR("Could not find joint '%s' in urdf", joint_name.c_str());
       return false;
     }
+
+    root_link_urdf_ = urdf_model.getLink(root_link);
+
    /* 
     // get urdf info about root_link
-    root_link_ = robot ->getHandle(root_name);
-    root_link_urdf_ = urdf_model.getLink(root_name);
+    root_link_ = robot ->getHandle(root_link);
+    root_link_urdf_ = urdf_model.getLink(root_link);
 
     if(!root_link_urdf_){
-      ROS_ERROR("Could not find joint '%s' in urdf", root_name.c_str());
+      ROS_ERROR("Could not find joint '%s' in urdf", root_link.c_str());
       return false;
     }
      */                        
@@ -92,23 +92,30 @@ namespace kdl_controllers  {
 
   bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n)
   {
+    std::string joint_name;
     if (!n.getParam("joint", joint_name)) {
       ROS_ERROR("No joint given (namespace: %s)", n.getNamespace().c_str());
       return false;
     }
-  
-    if(!n.getParam("root_link", root_name)) {
+
+   
+    std::string root_link;
+    if(!n.getParam("root_link", root_link)) {
       ROS_ERROR("No root_link given (namespace:%s)", n.getNamespace().c_str());
       return false;
     }   
 
-    if(!n.getParam("tip_link", tip_name)) {
+    n.param<std::string>("root_link", root_link, "mtm_right_top_panel");
+  
+    /*std::string tip_link;
+    if(!n.getParam("tip_link", tip_link)) {
       ROS_ERROR("No tip_link given (namespace:%s)", n.getNamespace().c_str());
       return false;
     }  
-
-
-    return init(robot, joint_name);
+    
+    n.param<std::string>("tip_link", tip_link, "mtm_right_wrist_roll_link");
+*/
+    return init(robot, joint_name, root_link);
   }
 
 /*
