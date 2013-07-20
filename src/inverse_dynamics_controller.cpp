@@ -58,7 +58,7 @@ namespace kdl_controllers  {
   }
 
   bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *robot, 
-      const std::string &joint_name, const std::string &root_link)
+      const std::string &joint_name, const std::string &root_link, const std::string &tip_link)
   {
     joint_ = robot->getHandle(joint_name);
 
@@ -76,7 +76,16 @@ namespace kdl_controllers  {
     }
 
     root_link_urdf_ = urdf_model.getLink(root_link);
+    if (!root_link_urdf_){
+      ROS_ERROR("Could not find joint '%s' in urdf", root_link.c_str());
+      return false;
+    }
 
+    tip_link_urdf_ = urdf_model.getLink(tip_link);
+    if (!joint_urdf_){
+      ROS_ERROR("Could not find joint '%s' in urdf", tip_link.c_str());
+      return false;
+    }
    /* 
     // get urdf info about root_link
     root_link_ = robot ->getHandle(root_link);
@@ -107,15 +116,15 @@ namespace kdl_controllers  {
 
     n.param<std::string>("root_link", root_link, "mtm_right_top_panel");
   
-    /*std::string tip_link;
+    std::string tip_link;
     if(!n.getParam("tip_link", tip_link)) {
       ROS_ERROR("No tip_link given (namespace:%s)", n.getNamespace().c_str());
       return false;
     }  
     
     n.param<std::string>("tip_link", tip_link, "mtm_right_wrist_roll_link");
-*/
-    return init(robot, joint_name, root_link);
+
+    return init(robot, joint_name, root_link, tip_link);
   }
 
 /*
