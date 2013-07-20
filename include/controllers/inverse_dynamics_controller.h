@@ -68,9 +68,8 @@ namespace kdl_controllers
     InverseDynamicsController();
     ~InverseDynamicsController();
 
-    bool init(hardware_interface::EffortJointInterface*robot,   const std::string &joint_name
-                                                              , const std::string &root_link
-                                                              , const std::string &tip_link);
+    bool init(hardware_interface::EffortJointInterface*robot,const std::string &root_link
+                                                           , const std::string &tip_link);
     bool init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n);
 
     /*!

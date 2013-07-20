@@ -58,23 +58,25 @@ namespace kdl_controllers  {
   }
 
   bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *robot, 
-      const std::string &joint_name, const std::string &root_link, const std::string &tip_link)
+       const std::string &root_link, const std::string &tip_link)
   {
+    /*
     joint_ = robot->getHandle(joint_name);
 
-    // get urdf info about joint
+    joint_urdf_ = urdf_model.getJoint(joint_name);
+    if (!joint_urdf_){
+      ROS_ERROR("Could not find joint '%s' in urdf", joint_name.c_str());
+      return false;
+    }*/
+
+    //get urdf info 
     urdf::Model urdf_model;
     if (!urdf_model.initParam("robot_description")){
       ROS_ERROR("Failed to parse urdf file");
       return false;
     }
 
-    joint_urdf_ = urdf_model.getJoint(joint_name);
-    if (!joint_urdf_){
-      ROS_ERROR("Could not find joint '%s' in urdf", joint_name.c_str());
-      return false;
-    }
-
+    
     root_link_urdf_ = urdf_model.getLink(root_link);
     if (!root_link_urdf_){
       ROS_ERROR("Could not find joint '%s' in urdf", root_link.c_str());
@@ -82,39 +84,24 @@ namespace kdl_controllers  {
     }
 
     tip_link_urdf_ = urdf_model.getLink(tip_link);
-    if (!joint_urdf_){
+    if (!tip_link_urdf_){
       ROS_ERROR("Could not find joint '%s' in urdf", tip_link.c_str());
       return false;
     }
-   /* 
-    // get urdf info about root_link
-    root_link_ = robot ->getHandle(root_link);
-    root_link_urdf_ = urdf_model.getLink(root_link);
-
-    if(!root_link_urdf_){
-      ROS_ERROR("Could not find joint '%s' in urdf", root_link.c_str());
-      return false;
-    }
-     */                        
+  
    return true;
   }
 
   bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n)
   {
-    std::string joint_name;
-    if (!n.getParam("joint", joint_name)) {
-      ROS_ERROR("No joint given (namespace: %s)", n.getNamespace().c_str());
-      return false;
-    }
-
-   
+  
     std::string root_link;
     if(!n.getParam("root_link", root_link)) {
       ROS_ERROR("No root_link given (namespace:%s)", n.getNamespace().c_str());
       return false;
     }   
 
-    n.param<std::string>("root_link", root_link, "mtm_right_top_panel");
+  //  n.param<std::string>("root_link", root_link, "mtm_right_top_panel");
   
     std::string tip_link;
     if(!n.getParam("tip_link", tip_link)) {
@@ -122,9 +109,9 @@ namespace kdl_controllers  {
       return false;
     }  
     
-    n.param<std::string>("tip_link", tip_link, "mtm_right_wrist_roll_link");
+   // n.param<std::string>("tip_link", tip_link, "mtm_right_wrist_roll_link");
 
-    return init(robot, joint_name, root_link, tip_link);
+    return init(robot, root_link, tip_link);
   }
 
 /*
