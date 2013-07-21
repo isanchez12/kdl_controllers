@@ -32,19 +32,13 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-//#include <iostream>
-//#include <map>
 
-//#include <Eigen/Dense>
-
-//#include <kdl/tree.hpp>
-
-//#include <kdl_parser/kdl_parser.hpp>
-
-#include <controllers/inverse_dynamics_controller.h>
+#include <kdl_controllers/inverse_dynamics_controller.h>
 #include <angles/angles.h>
 #include <pluginlib/class_list_macros.h>
 
+//#include <terse_roscpp/param.h>
+#include <list>
 
 namespace kdl_controllers  {
 
@@ -75,7 +69,9 @@ namespace kdl_controllers  {
       ROS_ERROR("Failed to parse urdf file");
       return false;
     }
-
+    
+    robot->getHandle(root_link);
+    robot->getHandle(tip_link);
     
     root_link_urdf_ = urdf_model.getLink(root_link);
     if (!root_link_urdf_){
@@ -93,7 +89,8 @@ namespace kdl_controllers  {
   }
 
   bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n)
-  {
+  {  
+ //   using namespace terse_roscpp;
   
     std::string root_link;
     if(!n.getParam("root_link", root_link)) {

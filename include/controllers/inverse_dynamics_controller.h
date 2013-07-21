@@ -33,8 +33,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef KDL_CONTROLLERS_INVERSE_DYNAMICS_CONTROLLER_H
-#define KDL_CONTROLLERS_INVERSE_DYNAMICS_CONTROLLER_H
+#ifndef __KDL_CONTROLLERS_INVERSE_DYNAMICS_CONTROLLER_H
+#define __KDL_CONTROLLERS_INVERSE_DYNAMICS_CONTROLLER_H
 
 #include <iostream>
 
@@ -57,6 +57,8 @@
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainjnttojacsolver.hpp>
 #include <kdl/jntarray.hpp>
+
+//#include <terse_roscpp/param.h>
 
 namespace kdl_controllers
 {
