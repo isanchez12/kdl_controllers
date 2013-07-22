@@ -57,7 +57,7 @@
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainjnttojacsolver.hpp>
 #include <kdl/jntarray.hpp>
-
+#include <kdl_parser/kdl_parser.hpp>
 //#include <terse_roscpp/param.h>
 
 namespace kdl_controllers
@@ -70,8 +70,6 @@ namespace kdl_controllers
     InverseDynamicsController();
     ~InverseDynamicsController();
 
-    bool init(hardware_interface::EffortJointInterface*robot,const std::string &root_link
-                                                           , const std::string &tip_link);
     bool init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n);
 
     /*!
@@ -96,9 +94,11 @@ namespace kdl_controllers
 
     boost::shared_ptr<const urdf::Link> root_link_urdf_;
     boost::shared_ptr<const urdf::Link> tip_link_urdf_;
-   // std::string 
-
+   
+    unsigned int num_joints;
+ 
   private:
+
     int loop_count_;
 //    control_toolbox::Pid pid_controller_;       /**< Internal PID controller. */
 
@@ -108,16 +108,8 @@ namespace kdl_controllers
 
     ros::Subscriber sub_command_;
     void setCommandCB(const std_msgs::Float64ConstPtr& msg);
-    /*
-    KDL::JntArray q_;     //joint positions
-    KDL::JntArray q0_;    //joint initial positions
-    KDL::JntArray qdot_;  //Joint velocities
-    KDL::Chain kdl_chain_;
 
-    // KDL Solvers performing the actual computations                                                                                                                               
-    boost::scoped_ptr<KDL::ChainFkSolverPos>    jnt_to_pose_solver_;
-    boost::scoped_ptr<KDL::ChainJntToJacSolver> jnt_to_jac_solver_;
-  */
+    //std::string root_name, tip_name; 
   };
 
 } // namespace

@@ -33,6 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include <ros/ros.h>
 #include <kdl_controllers/inverse_dynamics_controller.h>
 #include <angles/angles.h>
 #include <pluginlib/class_list_macros.h>
@@ -40,75 +41,69 @@
 //#include <terse_roscpp/param.h>
 #include <list>
 
+std::string root_name, tip_name;
+
 namespace kdl_controllers  {
 
  InverseDynamicsController::InverseDynamicsController()
-    : loop_count_(0)
-  {}
+  {
+  }
 
   InverseDynamicsController::~InverseDynamicsController()
   {
     sub_command_.shutdown();
   }
 
-  bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *robot, 
-       const std::string &root_link, const std::string &tip_link)
-  {
-    /*
-    joint_ = robot->getHandle(joint_name);
-
-    joint_urdf_ = urdf_model.getJoint(joint_name);
-    if (!joint_urdf_){
-      ROS_ERROR("Could not find joint '%s' in urdf", joint_name.c_str());
-      return false;
-    }*/
-
-    //get urdf info 
-    urdf::Model urdf_model;
-    if (!urdf_model.initParam("robot_description")){
-      ROS_ERROR("Failed to parse urdf file");
-      return false;
-    }
-    
-    robot->getHandle(root_link);
-    robot->getHandle(tip_link);
-    
-    root_link_urdf_ = urdf_model.getLink(root_link);
-    if (!root_link_urdf_){
-      ROS_ERROR("Could not find joint '%s' in urdf", root_link.c_str());
-      return false;
-    }
-
-    tip_link_urdf_ = urdf_model.getLink(tip_link);
-    if (!tip_link_urdf_){
-      ROS_ERROR("Could not find joint '%s' in urdf", tip_link.c_str());
-      return false;
-    }
-  
-   return true;
-  }
 
   bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n)
-  {  
- //   using namespace terse_roscpp;
-  
-    std::string root_link;
-    if(!n.getParam("root_link", root_link)) {
-      ROS_ERROR("No root_link given (namespace:%s)", n.getNamespace().c_str());
-      return false;
-    }   
+  { 
+/*
+   urdf::Model urdf_model;
+   if (!urdf_model.initParam("robot_description"))
+   {
+     ROS_ERROR("Failed to parse urdf file");
+     return false;
+   }
 
-  //  n.param<std::string>("root_link", root_link, "mtm_right_top_panel");
-  
-    std::string tip_link;
-    if(!n.getParam("tip_link", tip_link)) {
-      ROS_ERROR("No tip_link given (namespace:%s)", n.getNamespace().c_str());
+   std::string root_link;
+   std::string tip_link;
+   
+   root_link_urdf_ = urdf_model.getLink(root_link);
+   if (!root_link_urdf_){
+     ROS_ERROR("Could not find joint '%s' in urdf", root_link.c_str());
+     return false;
+   }
+
+
+   tip_link_urdf_ = urdf_model.getLink(tip_link);
+   if (!tip_link_urdf_){
+     ROS_ERROR("Could not find joint '%s' in urdf", tip_link.c_str());
+     return false;
+   }
+*/
+
+    // Get URDF XML
+    std::string urdf_xml, full_urdf_xml;
+    n.param("urdf_xml",urdf_xml,std::string("robot_description"));
+    n.searchParam(urdf_xml,full_urdf_xml); 
+    ROS_DEBUG("Reading xml file from parameter server");
+    std::string result;
+    if (!n.getParam(full_urdf_xml, result)) {
+      ROS_FATAL("Could not load the xml from parameter server: %s", urdf_xml.c_str());
       return false;
-    }  
+    }
+
+    // Get Root and Tip From Parameter Service
+    if (!n.getParam("/root_name", root_name)) {
+      ROS_FATAL("EE: No root_name found on parameter server");
+      return false;
+    }
     
-   // n.param<std::string>("tip_link", tip_link, "mtm_right_wrist_roll_link");
-
-    return init(robot, root_link, tip_link);
+    if (!n.getParam("/tip_name", tip_name)) {
+      ROS_FATAL("EE: No root_name found on parameter server");
+      return false;
+    }
+   return true;
   }
 
 /*
@@ -162,7 +157,7 @@ namespace kdl_controllers  {
 //    double commanded_effort = pid_controller_.computeCommand(error, vel_error, period); 
   //  joint_.setCommand( torques_ );
 
-    //for (unsigned int i = 0 ; i < n_joints_ ; i++) 
+    //for (unsigned int i = 0 ; i < njoints_ ; i++) 
     //{
      //// joint_handles_[i].setCommand( torques_
       //joint_.setCommand( torques_(i) );  
