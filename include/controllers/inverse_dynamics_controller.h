@@ -97,6 +97,9 @@ namespace kdl_controllers
    
     unsigned int num_joints;
  
+    //Inverse Dynamics Vars:
+   // std::vector<double> gravity_;
+
   private:
 
     int loop_count_;
@@ -109,7 +112,13 @@ namespace kdl_controllers
     ros::Subscriber sub_command_;
     void setCommandCB(const std_msgs::Float64ConstPtr& msg);
 
-    //std::string root_name, tip_name; 
+
+    // Working variables
+    //unsigned int n_dof_;
+    KDL::Tree kdl_tree_;
+    KDL::Chain kdl_chain_;
+    boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_;
+
   };
 
 } // namespace

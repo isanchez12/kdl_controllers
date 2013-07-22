@@ -33,7 +33,6 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <ros/ros.h>
 #include <kdl_controllers/inverse_dynamics_controller.h>
 #include <angles/angles.h>
 #include <pluginlib/class_list_macros.h>
@@ -41,7 +40,20 @@
 //#include <terse_roscpp/param.h>
 #include <list>
 
-std::string root_name, tip_name;
+#include <iostream>
+#include <map>
+
+#include <Eigen/Dense>
+
+#include <kdl/tree.hpp>
+
+#include <kdl_parser/kdl_parser.hpp>
+//#include <kdl_urdf_tools/tools.h>
+
+
+std::string root_link, tip_link;
+std::vector<double> gravity_(3, 0.0);
+unsigned int n_dof_(0);
 
 namespace kdl_controllers  {
 
@@ -57,31 +69,6 @@ namespace kdl_controllers  {
 
   bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n)
   { 
-/*
-   urdf::Model urdf_model;
-   if (!urdf_model.initParam("robot_description"))
-   {
-     ROS_ERROR("Failed to parse urdf file");
-     return false;
-   }
-
-   std::string root_link;
-   std::string tip_link;
-   
-   root_link_urdf_ = urdf_model.getLink(root_link);
-   if (!root_link_urdf_){
-     ROS_ERROR("Could not find joint '%s' in urdf", root_link.c_str());
-     return false;
-   }
-
-
-   tip_link_urdf_ = urdf_model.getLink(tip_link);
-   if (!tip_link_urdf_){
-     ROS_ERROR("Could not find joint '%s' in urdf", tip_link.c_str());
-     return false;
-   }
-*/
-
     // Get URDF XML
     std::string urdf_xml, full_urdf_xml;
     n.param("urdf_xml",urdf_xml,std::string("robot_description"));
@@ -94,17 +81,58 @@ namespace kdl_controllers  {
     }
 
     // Get Root and Tip From Parameter Service
-    if (!n.getParam("/root_name", root_name)) {
+    if (!n.getParam("/root_name", root_link)) {
       ROS_FATAL("EE: No root_name found on parameter server");
       return false;
     }
     
-    if (!n.getParam("/tip_name", tip_name)) {
+    if (!n.getParam("/tip_name", tip_link)) {
       ROS_FATAL("EE: No root_name found on parameter server");
       return false;
     }
-   return true;
+  
+  /*  
+    //Inverse Dynamics-Initialize Kinematics (..)
+    urdf::Model urdf_model;
+    if(!kdl_urdf_tools::initialize_kinematics_from_urdf(
+          urdf_xml, //not sure if this is correct way of declaring?
+          root_link_, 
+          tip_link_,
+          n_dof_,
+          kdl_chain_,
+          kdl_tree_, 
+          urdf_model))
+    {
+      ROS_ERROR("Could not initialize robot kinematics!");
+      return false;
+    }
+    */
+/*
+    // Create inverse dynamics chainsolver
+    id_solver_.reset(
+        new KDL::ChainIdSolver_RNE(
+          kdl_chain_,
+          KDL::Vector(gravity_[0],gravity_[1],gravity_[2])));
+
+*/
+
+
+    
+    
+    return true;
   }
+
+/*
+  bool InverseDynamicsController::computerInvDynTorque()
+  {
+    
+    KDL::JntArray q;  //positions
+    KDL::JntArray q_dot;  //velocity
+
+    q.resize(num_joints);
+    q_dot.resize(num_joints);
+  }
+*/
 
 /*
   void InverseDynamicsController::setGains(const double &p, const double &i, const double &d, const double &i_max, const double &i_min)
@@ -148,6 +176,7 @@ namespace kdl_controllers  {
   }
 
 
+
   void InverseDynamicsController::update(const ros::Time& time, const ros::Duration& period)
   {
     double command = *(command_.readFromRT());
@@ -162,6 +191,10 @@ namespace kdl_controllers  {
      //// joint_handles_[i].setCommand( torques_
       //joint_.setCommand( torques_(i) );  
     //}
+    
+
+
+
   }
 
   void InverseDynamicsController::setCommandCB(const std_msgs::Float64ConstPtr& msg)
