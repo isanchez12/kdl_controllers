@@ -90,13 +90,13 @@ namespace kdl_controllers  {
       ROS_FATAL("EE: No root_name found on parameter server");
       return false;
     }
- /* 
-    //Inverse Dynamics-Initialize Kinematics (..)
+    /////////////////////////////////////////////////////////////
+    //Inverse Dynamics-Initialize Kinematics 
     urdf::Model urdf_model;
     if(!kdl_urdf_tools::initialize_kinematics_from_urdf(
           urdf_xml, //not sure if this is correct way of declaring?
-          root_link_, 
-          tip_link_,
+          root_link, 
+          tip_link,
           n_dof_,
           kdl_chain_,
           kdl_tree_, 
@@ -105,17 +105,11 @@ namespace kdl_controllers  {
       ROS_ERROR("Could not initialize robot kinematics!");
       return false;
     }
-    */
-/*
     // Create inverse dynamics chainsolver
     id_solver_.reset(
         new KDL::ChainIdSolver_RNE(
           kdl_chain_,
           KDL::Vector(gravity_[0],gravity_[1],gravity_[2])));
-
-*/
-
-
     
     
     return true;
