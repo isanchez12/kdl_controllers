@@ -48,7 +48,7 @@
 #include <kdl/tree.hpp>
 
 #include <kdl_parser/kdl_parser.hpp>
-//#include <kdl_urdf_tools/tools.h>
+#include <kdl_urdf_tools/tools.h>
 
 
 std::string root_link, tip_link;
@@ -90,8 +90,7 @@ namespace kdl_controllers  {
       ROS_FATAL("EE: No root_name found on parameter server");
       return false;
     }
-  
-  /*  
+ /* 
     //Inverse Dynamics-Initialize Kinematics (..)
     urdf::Model urdf_model;
     if(!kdl_urdf_tools::initialize_kinematics_from_urdf(

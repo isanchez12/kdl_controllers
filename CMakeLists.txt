@@ -3,7 +3,7 @@ project(kdl_controllers)
 
 find_package(catkin REQUIRED COMPONENTS controllers_msgs realtime_tools
        urdf controller_interface forward_command_controller
-  ) 
+       kdl_urdf_tools  ) 
 # roscpp hardware_interface pluginlib controller_interface sensor_msgs
 find_package(Eigen REQUIRED)
 include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS})
@@ -15,7 +15,7 @@ add_library( ${PROJECT_NAME}
 # target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 catkin_package(
-  CATKIN_DEPENDS forward_command_controller controllers_msgs urdf controller_interface realtime_tools 
+  CATKIN_DEPENDS kdl_urdf_tools forward_command_controller controllers_msgs urdf controller_interface realtime_tools 
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   )

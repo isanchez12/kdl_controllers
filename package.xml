@@ -7,7 +7,7 @@
 
   <license>BSD</license>
 
-  <url type="website">http://github.com/isanchez12/kdl_controllers</url> 
+  <url type="website" >http://github.com/isanchez12/kdl_controllers</url> 
 
   <author>Ish Sanchez</author>
 
@@ -19,17 +19,19 @@
   <build_depend>urdf</build_depend> 
   <build_depend>forward_command_controller</build_depend>
   <build_depend>kdl_urdf_tools</build_depend>
-  <!--
-  'kdl"
-  'kdl_parser"
--->
+  
+  <build_depend>kdl</build_depend>
+  <build_depend>kdl_parser</build_depend>
+  
   <run_depend>controller_interface</run_depend> 
   <run_depend>controllers_msgs</run_depend> 
   <run_depend>realtime_tools</run_depend> 
   <run_depend>urdf</run_depend> 
   <run_depend>forward_command_controller</run_depend>
   <run_depend>kdl_urdf_tools</run_depend>
-
+  
+  <run_depend>kdl</run_depend>
+  <run_depend>kdl_parser</run_depend>
   <export>
     <controller_interface plugin="${prefix}/kdl_controller_plugins.xml"/>
   </export>
