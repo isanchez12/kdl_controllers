@@ -56,6 +56,8 @@ std::vector<double> gravity_(3, 0.0);
 unsigned int n_dof_(0);
 
 std::vector<double> control_torque_;
+//#include <effort_controllers/joint_effort_controller.h>
+
 
 namespace kdl_controllers  {
 
@@ -209,12 +211,12 @@ namespace kdl_controllers  {
 
     //KDL::JntArray jointpositions = JntArray(chain.getNrOfJoints());
    ////************************experimental******
-   for(unsigned int i=0; i < num_joints_; ++i)
+   for(unsigned int i=0; i < n_dof_; ++i)
     {
       joint_.setCommand(control_torque_[i]);
     }
 
-    updateJointControllers();
+//    updateJointControllers();
 
 /*  //prints out the computed values
     for(unsigned int i=0; i < num_joints_; ++i)
@@ -224,7 +226,6 @@ namespace kdl_controllers  {
  */
 
   }
-
   void InverseDynamicsController::setCommandCB(const std_msgs::Float64ConstPtr& msg)
   {
     setCommand(msg->data);
