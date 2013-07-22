@@ -55,6 +55,8 @@ std::string root_link, tip_link;
 std::vector<double> gravity_(3, 0.0);
 unsigned int n_dof_(0);
 
+std::vector<double> control_torque_;
+
 namespace kdl_controllers  {
 
  InverseDynamicsController::InverseDynamicsController()
@@ -117,6 +119,8 @@ namespace kdl_controllers  {
     torques_.resize(n_dof_);
     ext_wrenches_.resize(kdl_chain_.getNrOfSegments());
 
+    control_torque_.resize(n_dof_);
+
     // Zero out torque data
     torques_.data.setZero();
     accelerations_.data.setZero();
@@ -125,17 +129,6 @@ namespace kdl_controllers  {
     return true;
   }
 
-/*
-  bool InverseDynamicsController::computerInvDynTorque()
-  {
-    
-    KDL::JntArray q;  //positions
-    KDL::JntArray q_dot;  //velocity
-
-    q.resize(num_joints);
-    q_dot.resize(num_joints);
-  }
-*/
 
 /*
   void InverseDynamicsController::setGains(const double &p, const double &i, const double &d, const double &i_max, const double &i_min)
@@ -171,6 +164,7 @@ namespace kdl_controllers  {
     //  * there is only one single rt thread
     command_.writeFromNonRT(cmd);
   }
+ 
 
 
   void InverseDynamicsController::starting(const ros::Time& time) 
@@ -178,25 +172,56 @@ namespace kdl_controllers  {
     command_.initRT(joint_.getPosition());
   }
 
-
-
+  
   void InverseDynamicsController::update(const ros::Time& time, const ros::Duration& period)
   {
     double command = *(command_.readFromRT());
 
     // Set the PID error and compute the PID command with nonuniform
     // time step size. This also allows the user to pass in a precomputed derivative error. 
-//    double commanded_effort = pid_controller_.computeCommand(error, vel_error, period); 
-  //  joint_.setCommand( torques_ );
+    //    double commanded_effort = pid_controller_.computeCommand(error, vel_error, period); 
+    //  joint_.setCommand( torques_ );
 
     //for (unsigned int i = 0 ; i < njoints_ ; i++) 
     //{
-     //// joint_handles_[i].setCommand( torques_
-      //joint_.setCommand( torques_(i) );  
+    //// joint_handles_[i].setCommand( torques_
+    //joint_.setCommand( torques_(i) );  
     //}
-    
 
+    // Compute inverse dynamics
+    // This computes the torques on each joint of the arm as a function of
+    // the arm's joint-space position, velocities, accelerations, external
+    // forces/torques and gravity.
+    if(id_solver_->CartToJnt(
+          positions_.q,
+          positions_.qdot,
+          accelerations_,
+          ext_wrenches_,
+          torques_) != 0)
+    {
+      ROS_ERROR("Could not compute joint torques!");
+    }
 
+/*
+    // Send joint positions
+   joint_.setCommand( torques_ );
+*/
+
+    //KDL::JntArray jointpositions = JntArray(chain.getNrOfJoints());
+   ////************************experimental******
+   for(unsigned int i=0; i < num_joints_; ++i)
+    {
+      joint_.setCommand(control_torque_[i]);
+    }
+
+    updateJointControllers();
+
+/*  //prints out the computed values
+    for(unsigned int i=0; i < num_joints_; ++i)
+    {
+      //    fprintf(stderr,"Effort: %d %f %f %f\n",i,control_torque_[i],gravity_torque_[i][2],joint_effort_controllers_[i]->joint_->commanded_effort_);
+    }
+ */
 
   }
 
