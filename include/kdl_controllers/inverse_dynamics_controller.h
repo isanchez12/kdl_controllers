@@ -66,6 +66,7 @@ namespace kdl_controllers
 
   class InverseDynamicsController: public controller_interface::Controller<hardware_interface::EffortJointInterface>
   {
+
   public:
 
     InverseDynamicsController();
@@ -104,7 +105,6 @@ namespace kdl_controllers
   private:
 
     int loop_count_;
-//    control_toolbox::Pid pid_controller_;       /**< Internal PID controller. */
 
     boost::scoped_ptr<
       realtime_tools::RealtimePublisher<
@@ -113,10 +113,10 @@ namespace kdl_controllers
     ros::Subscriber sub_command_;
 
     void setCommandCB(const std_msgs::Float64ConstPtr& msg);
-/*
+
 
     // Working variables
-    //unsigned int n_dof_;
+    unsigned int n_dof_;
     KDL::Tree kdl_tree_;
     KDL::Chain kdl_chain_;
     boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_;
@@ -127,7 +127,6 @@ namespace kdl_controllers
     KDL::JntArrayVel positions_;
     KDL::JntArray accelerations_;
     KDL::JntArray torques_;
- */
   };
 } // namespace
 #endif

@@ -50,10 +50,14 @@
 #include <kdl_parser/kdl_parser.hpp>
 #include <kdl_urdf_tools/tools.h>
 
-
+/*
 std::string root_link, tip_link;
-std::vector<double> gravity_(3, 0.0);
 unsigned int n_dof_(0);
+*/
+std::string robot_description_ = "";
+std::string root_link_ = "";
+std::string tip_link_= "";
+std::vector<double> gravity_ (3,0.0);
 
 namespace kdl_controllers  {
 
@@ -81,32 +85,30 @@ namespace kdl_controllers  {
     }
 
     // Get Root and Tip From Parameter Service
-    if (!n.getParam("/root_link", root_link)) {
+    if (!n.getParam("/root_link", root_link_)) {
       ROS_FATAL("EE: No root_name found on parameter server");
       return false;
     }
    ROS_INFO("LOADING THE TIP LINK PLEASE WAIT");
 
-    if (!n.getParam("/tip_link", tip_link)) {
+    if (!n.getParam("/tip_link", tip_link_)) {
       ROS_FATAL("EE: No root_name found on parameter server");
       return false;
     }
 /*
+    
     /////////////////////////////////////////////////////////////
     //Inverse Dynamics-Initialize Kinematics 
     urdf::Model urdf_model;
+      
     if(!kdl_urdf_tools::initialize_kinematics_from_urdf(
-          urdf_xml, //not sure if this is correct way of declaring?
-          root_link, 
-          tip_link,
-          n_dof_,
-          kdl_chain_,
-          kdl_tree_, 
-          urdf_model))
+          robot_description_, root_link_, tip_link_,
+          n_dof_, kdl_chain_, kdl_tree_, urdf_model))
     {
       ROS_ERROR("Could not initialize robot kinematics!");
       return false;
     }
+  */  /*
     // Create inverse dynamics chainsolver
     id_solver_.reset(
         new KDL::ChainIdSolver_RNE(
