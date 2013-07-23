@@ -177,7 +177,7 @@ namespace kdl_controllers  {
 
   void InverseDynamicsController::starting(const ros::Time& time) 
   {
-    command_.initRT(joint_.getPosition());
+    //command_.initRT(joint_.getPosition());
   }
 
 
