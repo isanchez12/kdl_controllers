@@ -113,7 +113,7 @@ namespace kdl_controllers
     ros::Subscriber sub_command_;
 
     void setCommandCB(const std_msgs::Float64ConstPtr& msg);
-
+/*
 
     // Working variables
     //unsigned int n_dof_;
@@ -127,8 +127,8 @@ namespace kdl_controllers
     KDL::JntArrayVel positions_;
     KDL::JntArray accelerations_;
     KDL::JntArray torques_;
+ */
   };
-
 } // namespace
 #endif
 

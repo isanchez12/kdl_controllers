@@ -81,15 +81,17 @@ namespace kdl_controllers  {
     }
 
     // Get Root and Tip From Parameter Service
-    if (!n.getParam("/root_name", root_link)) {
+    if (!n.getParam("/root_link", root_link)) {
       ROS_FATAL("EE: No root_name found on parameter server");
       return false;
     }
-    
-    if (!n.getParam("/tip_name", tip_link)) {
+   ROS_INFO("LOADING THE TIP LINK PLEASE WAIT");
+
+    if (!n.getParam("/tip_link", tip_link)) {
       ROS_FATAL("EE: No root_name found on parameter server");
       return false;
     }
+/*
     /////////////////////////////////////////////////////////////
     //Inverse Dynamics-Initialize Kinematics 
     urdf::Model urdf_model;
@@ -121,7 +123,7 @@ namespace kdl_controllers  {
     torques_.data.setZero();
     accelerations_.data.setZero();
 
-
+*/
     return true;
   }
 
