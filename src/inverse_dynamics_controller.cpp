@@ -71,6 +71,7 @@ urdf::Model& urdf_model;
 unsigned int& n_dof_;
 
 */
+//boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_(NULL); 
 
 namespace kdl_controllers  {
 
@@ -94,7 +95,7 @@ namespace kdl_controllers  {
 
     // Initialize kinematics (KDL tree, KDL chain, and #DOF)
     urdf::Model urdf_model;
-    
+   
     if(!kdl_urdf_tools::initialize_kinematics_from_urdf(
           robot_description_, root_link_, tip_link_,
           n_dof_, kdl_chain_, kdl_tree_, urdf_model))
@@ -102,12 +103,15 @@ namespace kdl_controllers  {
       ROS_ERROR("Could not initialize robot kinematics!");
       return false;
     }
+  
+ //   id_solver_ = new KDL::ChainIdSolver_RNE( kdl_chain_, KDL::Vector(gravity_[0],gravity_[1],gravity_[2]));
+/*    
     // Create inverse dynamics chainsolver
     id_solver_.reset(
     new KDL::ChainIdSolver_RNE(
     kdl_chain_,
     KDL::Vector(gravity_[0],gravity_[1],gravity_[2])));
-/*
+
     // Resize working vectors
     positions_.resize(n_dof_);
     accelerations_.resize(n_dof_);

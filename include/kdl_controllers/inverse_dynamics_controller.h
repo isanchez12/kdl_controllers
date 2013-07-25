@@ -130,7 +130,7 @@ namespace kdl_controllers
  //   unsigned int n_dof_;
     KDL::Tree kdl_tree_;
     KDL::Chain kdl_chain_;
-    boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_;
+  //  boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_;
 
 
     KDL::Wrenches ext_wrenches_;
