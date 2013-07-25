@@ -54,15 +54,27 @@
 /*
 std::string root_link, tip_link;
 unsigned int n_dof_(0);
-*/
+
 std::string robot_description_ = "";
 std::string root_link_ = "";
 std::string tip_link_= "";
 std::vector<double> gravity_ (3,0.0);
+*/
+/*
+
+const std::string& robot_description_(""); 
+const std::string& root_link_("");
+const std::string& tip_link_("");
+KDL::Chain& kdl_chain_() ;
+KDL::Tree& kdl_tree_(); 
+urdf::Model& urdf_model;
+unsigned int& n_dof_;
+
+*/
 
 namespace kdl_controllers  {
 
- InverseDynamicsController::InverseDynamicsController()
+  InverseDynamicsController::InverseDynamicsController()
   {
   }
 
@@ -71,35 +83,89 @@ namespace kdl_controllers  {
     sub_command_.shutdown();
   }
 
-bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *robot, 
-    robot_description, 
-    const std::string &root_link, tip_link, kdl_chain , kdl_tree, gravity_ )
-{
-  joint_ = robot->getHandle(joint_name);
-  pid_controller_ = pid;
+  bool InverseDynamicsController::init(
+      const std::string& robot_description_, 
+      const std::string& root_link_,
+      const std::string& tip_link_,
+      KDL::Chain& kdl_chain_ ,
+      KDL::Tree& kdl_tree_,  
+      unsigned int& n_dof_)
+  {
 
-  // get urdf info about joint
-  urdf::Model urdf;
-  if (!urdf.initParam("robot_description")){
-    ROS_ERROR("Failed to parse urdf file");
-    return false;
-  }
-  joint_urdf_ = urdf.getJoint(joint_name);
-  if (!joint_urdf_){
-    ROS_ERROR("Could not find joint '%s' in urdf", joint_name.c_str());
-    return false;
-  }
+    // Initialize kinematics (KDL tree, KDL chain, and #DOF)
+    urdf::Model urdf_model;
+    
+    if(!kdl_urdf_tools::initialize_kinematics_from_urdf(
+          robot_description_, root_link_, tip_link_,
+          n_dof_, kdl_chain_, kdl_tree_, urdf_model))
+    {
+      ROS_ERROR("Could not initialize robot kinematics!");
+      return false;
+    }
+    // Create inverse dynamics chainsolver
+    id_solver_.reset(
+    new KDL::ChainIdSolver_RNE(
+    kdl_chain_,
+    KDL::Vector(gravity_[0],gravity_[1],gravity_[2])));
+/*
+    // Resize working vectors
+    positions_.resize(n_dof_);
+    accelerations_.resize(n_dof_);
+    torques_.resize(n_dof_);
+    ext_wrenches_.resize(kdl_chain_.getNrOfSegments());
 
-  return true;
-}
+    // Zero out torque data
+    torques_.data.setZero();
+    accelerations_.data.setZero();
+    */ //------------------------------------------------------------
+    /* 
+    // Construct an URDF model from the xml string
+    urdf_model.initString(robot_description_);
+
+    // Get a KDL tree from the robot URDF
+    if (!kdl_parser::treeFromUrdfModel(urdf_model, kdl_tree_)){
+    ROS_ERROR("Failed to construct kdl tree");
+    return false;
+    }
+
+    // Populate the KDL chain
+    if(!kdl_tree_.getChain(root_link, tip_link, kdl_chain_))
+    {
+    ROS_ERROR_STREAM("Failed to get KDL chain from tree: ");
+    ROS_ERROR_STREAM("  "<<root_link<<" --> "<<tip_link);
+    ROS_ERROR_STREAM("  Tree has "<<kdl_tree_.getNrOfJoints()<<" joints");
+    ROS_ERROR_STREAM("  Tree has "<<kdl_tree_.getNrOfSegments()<<" segments");
+    ROS_ERROR_STREAM("  The segments are:");
+
+    KDL::SegmentMap segment_map = kdl_tree_.getSegments();
+    KDL::SegmentMap::iterator it;
+
+    for( it=segment_map.begin();
+    it != segment_map.end();
+    it++ )
+    {
+    ROS_ERROR_STREAM( "    "<<(*it).first);
+    }
+
+    return false;
+    }
+
+    // Store the number of degrees of freedom of the chain
+    n_dof_ = kdl_chain_.getNrOfJoints();
+    */
+
+
+
+    return true;
+  }
 
   bool InverseDynamicsController::init( hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n)
   { 
 
     // KDL::Tree kdl_tree_;
     //KDL::Chain kdl_chain_;
-    urdf::Model urdf_model;
-    
+   // urdf::Model urdf_model;
+    /*----------------------------------------------------------
     // Get URDF XML
     std::string urdf_xml, full_urdf_xml;
     n.param("urdf_xml",urdf_xml,std::string("robot_description"));
@@ -129,7 +195,7 @@ bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *r
     }
 
     ROS_INFO("LOADING THE TIP LINK PLEASE WAIT");
-
+*/ /*--------------------------------------------------------------
     KDL::Tree kdl_tree_;
     KDL::Chain kdl_chain_;
     if (!kdl_parser::treeFromUrdfModel(*urdf_model, kdl_tree_))
@@ -137,7 +203,7 @@ bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *r
       ROS_ERROR_NAMED("kdl","Could not initialize tree object");
       return false;
     }
-    if (!kdl_tree.getChain(base_frame_, tip_frame_, kdl_chain_))
+    if (!kdl_tree_.getChain(base_frame_, tip_frame_, kdl_chain_))
     {
       ROS_ERROR_NAMED("kdl","Could not initialize chain object");
       return false;
@@ -146,7 +212,7 @@ bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *r
     /*
     if(!kdl_urdf_tools::initialize_kinematics_from_urdf(
           robot_description_, root_link_, tip_link_,
-          n_dof_, kdl_chain_, kdl_tree_, urdf_model))
+          n_dof_, kdl_chain_, kdl_tree__, urdf_model))
     {
       ROS_ERROR("Could not initialize robot kinematics!");
       return false;
@@ -190,21 +256,6 @@ bool InverseDynamicsController::init(hardware_interface::EffortJointInterface *r
     }
 */
     return true;
-  }
-
-  bool InverseDynamicsController::loadModel(const std::string xml) {
-    urdf::Model urdf_model;
-    KDL::Tree tree;
-/*
-    if (!urdf_model.initString(xml)) {
-      ROS_FATAL("Could not initialize robot model");
-      return -1;
-    }
-*/
-    if (!kdl_parser::treeFromString(xml, tree)) {
-      ROS_ERROR("Could not initialize tree object");
-      return false;
-    }
   }
   
   /*

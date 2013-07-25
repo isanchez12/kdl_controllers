@@ -74,13 +74,19 @@ namespace kdl_controllers
 
      bool init( hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n);
 
+     bool init(
+         const std::string& robot_description_,  
+         const std::string& root_link_,
+         const std::string& tip_link_,
+         KDL::Chain& kdl_chain_ ,
+         KDL::Tree& kdl_tree_,  
+         unsigned int& n_dof_);
     /*!
      *    * \brief Give set position of the joint for next update: revolute (angle) and prismatic (position)
      *       *
      *          * \param command
      *             */
     
-    bool loadModel(const std::string xml);
     void setCommand(double cmd);
 
     void starting(const ros::Time& time);
@@ -104,7 +110,7 @@ namespace kdl_controllers
     unsigned int num_joints;
  
     //Inverse Dynamics Vars:
-   // std::vector<double> gravity_;
+    std::vector<double> gravity_;
     int i;
   private:
 
@@ -121,11 +127,10 @@ namespace kdl_controllers
    urdf::Model urdf_model;
 
     // Working variables
-    unsigned int n_dof_;
+ //   unsigned int n_dof_;
     KDL::Tree kdl_tree_;
-
     KDL::Chain kdl_chain_;
- /*   boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_;
+    boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_;
 
 
     KDL::Wrenches ext_wrenches_;
@@ -133,7 +138,7 @@ namespace kdl_controllers
     KDL::JntArrayVel positions_;
     KDL::JntArray accelerations_;
     KDL::JntArray torques_;
-  */
+  
     };
 } // namespace
 #endif
