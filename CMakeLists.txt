@@ -10,9 +10,10 @@ include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${EIGEN_
 add_definitions(${EIGEN_DEFINITIONS})
 
 add_library( ${PROJECT_NAME}
-  src/inverse_dynamics_controller.cpp #include/kdl_controllers/inverse_dynamics_controller.h
+  src/inverse_dynamics_controller.cpp include/kdl_controllers/inverse_dynamics_controller.h
   )
-# target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 catkin_package(
   CATKIN_DEPENDS roscpp orocos_kdl pluginlib kdl_urdf_tools forward_command_controller control_msgs urdf controller_interface realtime_tools 

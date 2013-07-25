@@ -71,7 +71,7 @@ urdf::Model& urdf_model;
 unsigned int& n_dof_;
 
 */
-//boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_(NULL); 
+boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_(NULL); 
 
 namespace kdl_controllers  {
 
@@ -95,7 +95,14 @@ namespace kdl_controllers  {
 
     // Initialize kinematics (KDL tree, KDL chain, and #DOF)
     urdf::Model urdf_model;
-   
+    // Construct an URDF model from the xml string
+    urdf_model.initString(robot_description_);
+    // Get a KDL tree from the robot URDF
+    if (!kdl_parser::treeFromUrdfModel(urdf_model, kdl_tree_)){
+    ROS_ERROR("Failed to construct kdl tree");
+    return false;
+    }
+    
     if(!kdl_urdf_tools::initialize_kinematics_from_urdf(
           robot_description_, root_link_, tip_link_,
           n_dof_, kdl_chain_, kdl_tree_, urdf_model))
@@ -105,7 +112,7 @@ namespace kdl_controllers  {
     }
   
  //   id_solver_ = new KDL::ChainIdSolver_RNE( kdl_chain_, KDL::Vector(gravity_[0],gravity_[1],gravity_[2]));
-/*    
+  
     // Create inverse dynamics chainsolver
     id_solver_.reset(
     new KDL::ChainIdSolver_RNE(
@@ -121,7 +128,7 @@ namespace kdl_controllers  {
     // Zero out torque data
     torques_.data.setZero();
     accelerations_.data.setZero();
-    */ //------------------------------------------------------------
+     //------------------------------------------------------------
     /* 
     // Construct an URDF model from the xml string
     urdf_model.initString(robot_description_);
@@ -290,9 +297,13 @@ namespace kdl_controllers  {
   void InverseDynamicsController::starting(const ros::Time& time) 
   {
 
-
-    
-      command_.initRT(joint_.getPosition());
+    /************error with this command**********fix
+     * gzserver: /home/isan/M_catkin_ws/src/ros_control/hardware_interface/include/hardware_interface/joint_state_interface.h:70: 
+     * double hardware_interface::JointStateHandle::getPosition() const: Assertion `pos_' failed.
+     *
+     *
+     */
+      //command_.initRT(joint_.getPosition());
   }
 
 
