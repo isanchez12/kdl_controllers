@@ -51,26 +51,6 @@
 #include <kdl_urdf_tools/tools.h>
 #include <ros/ros.h>
 
-/*
-std::string root_link, tip_link;
-unsigned int n_dof_(0);
-
-std::string robot_description_ = "";
-std::string root_link_ = "";
-std::string tip_link_= "";
-std::vector<double> gravity_ (3,0.0);
-*/
-/*
-
-const std::string& robot_description_(""); 
-const std::string& root_link_("");
-const std::string& tip_link_("");
-KDL::Chain& kdl_chain_() ;
-KDL::Tree& kdl_tree_(); 
-urdf::Model& urdf_model;
-unsigned int& n_dof_;
-
-*/
 boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_(NULL); 
 
 namespace kdl_controllers  {
@@ -111,8 +91,6 @@ namespace kdl_controllers  {
       return false;
     }
   
- //   id_solver_ = new KDL::ChainIdSolver_RNE( kdl_chain_, KDL::Vector(gravity_[0],gravity_[1],gravity_[2]));
-  
     // Create inverse dynamics chainsolver
     id_solver_.reset(
     new KDL::ChainIdSolver_RNE(
@@ -128,44 +106,6 @@ namespace kdl_controllers  {
     // Zero out torque data
     torques_.data.setZero();
     accelerations_.data.setZero();
-     //------------------------------------------------------------
-    /* 
-    // Construct an URDF model from the xml string
-    urdf_model.initString(robot_description_);
-
-    // Get a KDL tree from the robot URDF
-    if (!kdl_parser::treeFromUrdfModel(urdf_model, kdl_tree_)){
-    ROS_ERROR("Failed to construct kdl tree");
-    return false;
-    }
-
-    // Populate the KDL chain
-    if(!kdl_tree_.getChain(root_link, tip_link, kdl_chain_))
-    {
-    ROS_ERROR_STREAM("Failed to get KDL chain from tree: ");
-    ROS_ERROR_STREAM("  "<<root_link<<" --> "<<tip_link);
-    ROS_ERROR_STREAM("  Tree has "<<kdl_tree_.getNrOfJoints()<<" joints");
-    ROS_ERROR_STREAM("  Tree has "<<kdl_tree_.getNrOfSegments()<<" segments");
-    ROS_ERROR_STREAM("  The segments are:");
-
-    KDL::SegmentMap segment_map = kdl_tree_.getSegments();
-    KDL::SegmentMap::iterator it;
-
-    for( it=segment_map.begin();
-    it != segment_map.end();
-    it++ )
-    {
-    ROS_ERROR_STREAM( "    "<<(*it).first);
-    }
-
-    return false;
-    }
-
-    // Store the number of degrees of freedom of the chain
-    n_dof_ = kdl_chain_.getNrOfJoints();
-    */
-
-
 
     return true;
   }
@@ -173,11 +113,7 @@ namespace kdl_controllers  {
   bool InverseDynamicsController::init( hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n)
   { 
 
-    // KDL::Tree kdl_tree_;
-    //KDL::Chain kdl_chain_;
-   // urdf::Model urdf_model;
-    /*----------------------------------------------------------
-    // Get URDF XML
+   // Get URDF XML
     std::string urdf_xml, full_urdf_xml;
     n.param("urdf_xml",urdf_xml,std::string("robot_description"));
     n.searchParam(urdf_xml,full_urdf_xml); 
@@ -196,9 +132,8 @@ namespace kdl_controllers  {
       ROS_FATAL("EE: No root_link_ found on parameter server");
       return false;
     }
-     
+
      ROS_INFO("LOADING THE TIP LINK PLEASE WAIT");
-         
 
     if (!n.getParam("/tip_link", tip_link_)) {
       ROS_FATAL("EE: No root_link_ found on parameter server");
@@ -206,47 +141,13 @@ namespace kdl_controllers  {
     }
 
     ROS_INFO("LOADING THE TIP LINK PLEASE WAIT");
-*/ /*--------------------------------------------------------------
-    KDL::Tree kdl_tree_;
-    KDL::Chain kdl_chain_;
-    if (!kdl_parser::treeFromUrdfModel(*urdf_model, kdl_tree_))
-    {
-      ROS_ERROR_NAMED("kdl","Could not initialize tree object");
-      return false;
-    }
-    if (!kdl_tree_.getChain(base_frame_, tip_frame_, kdl_chain_))
-    {
-      ROS_ERROR_NAMED("kdl","Could not initialize chain object");
-      return false;
-    }
-
-    /*
-    if(!kdl_urdf_tools::initialize_kinematics_from_urdf(
-          robot_description_, root_link_, tip_link_,
-          n_dof_, kdl_chain_, kdl_tree__, urdf_model))
-    {
-      ROS_ERROR("Could not initialize robot kinematics!");
-      return false;
-    }
-    */
-/*
-    //Load model
-    if (!loadModel(full_urdf_xml)) {
-      ROS_FATAL("Could not load models!");
-      return false;
-    }
-  */
-     // urdf_model.getLink(root_link_);
-   // urdf_model.getLink(tip_link_);
-    //////////////reading joints ////////////////////////
-
+    
     num_joints = 0;
     // get joint maxs and mins
-     
-   // boost::shared_ptr<const urdf::Link> link = urdf_model.getLink(tip_link_);
-     boost::shared_ptr<const urdf::Joint> joint_;
-
-  /*  //root to tip
+    boost::shared_ptr<const urdf::Link> link = urdf_model.getLink(tip_link_);
+    boost::shared_ptr<const urdf::Joint> joint_urdf;
+    
+  /* //root to tip
     while (tip_link_urdf_ && tip_link_urdf_ ->name != root_link_) 
     {
       joint_ = urdf_model.getJoint(link->parent_joint->name);

@@ -67,6 +67,10 @@ namespace kdl_controllers
   class InverseDynamicsController: public controller_interface::Controller<hardware_interface::EffortJointInterface>
   {
 
+    std::string robot_description_;
+    std::string root_link_;
+    std::string tip_link_;
+  
   public:
 
      InverseDynamicsController();
@@ -104,7 +108,7 @@ namespace kdl_controllers
     boost::shared_ptr<const urdf::Joint> joint_urdf_;
     realtime_tools::RealtimeBuffer<double> command_;             /**< Last commanded position. */
 
-    boost::shared_ptr<const urdf::Link> root_link_urdf_;
+ //   boost::shared_ptr<const urdf::Link> root_link_urdf_;
     boost::shared_ptr<const urdf::Link> tip_link_urdf_;
    
     unsigned int num_joints;
