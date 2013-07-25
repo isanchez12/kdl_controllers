@@ -60,6 +60,9 @@
 #include <kdl/chainidsolver_recursive_newton_euler.hpp>
 
 //#include <terse_roscpp/param.h>
+//for finding joints states
+#include <hardware_interface/joint_state_interface.h>
+
 
 namespace kdl_controllers
 {
@@ -76,14 +79,16 @@ namespace kdl_controllers
      InverseDynamicsController();
     ~InverseDynamicsController();
 
-     bool init( hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n);
+    bool init( hardware_interface::EffortJointInterface *robot, 
+        hardware_interface::JointStateInterface* hw, 
+        ros::NodeHandle &n);
 
-     bool init(
-         const std::string& robot_description_,  
-         const std::string& root_link_,
-         const std::string& tip_link_,
-         KDL::Chain& kdl_chain_ ,
-         KDL::Tree& kdl_tree_,  
+    bool init(
+        const std::string& robot_description_,  
+        const std::string& root_link_,
+        const std::string& tip_link_,
+        KDL::Chain& kdl_chain_ ,
+        KDL::Tree& kdl_tree_,  
          unsigned int& n_dof_);
     /*!
      *    * \brief Give set position of the joint for next update: revolute (angle) and prismatic (position)
@@ -131,7 +136,6 @@ namespace kdl_controllers
    urdf::Model urdf_model;
 
     // Working variables
- //   unsigned int n_dof_;
     KDL::Tree kdl_tree_;
     KDL::Chain kdl_chain_;
   //  boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_;
@@ -142,7 +146,10 @@ namespace kdl_controllers
     KDL::JntArrayVel positions_;
     KDL::JntArray accelerations_;
     KDL::JntArray torques_;
-  
+ 
+    // joint states 
+     std::vector<hardware_interface::JointStateHandle> joint_state_;
+
     };
 } // namespace
 #endif

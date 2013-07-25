@@ -90,7 +90,42 @@ namespace kdl_controllers  {
       ROS_ERROR("Could not initialize robot kinematics!");
       return false;
     }
-  
+ 
+    ////////////////////GETTING JOINTS ///////////////////////
+//     boost::shared_ptr<const urdf::Link> link = urdf_model.getLink(tip_link_);
+ /*   std::string link = tip_link_;
+
+    std::vector<std::string> JOINT_ ;
+
+    for(unsigned int i= 0; i <= n_dof_; i++)
+    {
+      //tip to root
+      while ( link != root_link_) 
+      {
+
+        joint_(i) = urdf_model.getParentJoint(link);
+
+        if (!joint_(i)) 
+        {
+          ROS_ERROR("Could not find joint: %s", joint_(i).c_str());
+          return false;
+        }
+
+         link = urdf_model.getParentLink(tip_link_);
+      }
+    }
+*/
+/*
+    //Print out the list of all the joints that will be used
+    ROS_INFO("liST OF ALL THE JOINTS THAT WILL BE COMMANDED");
+    
+    for (unsigned int j=0; j < n_dof_; j++) 
+    {
+      ROS_INFO("joint  :   %s \n ", joint_(j).c_str());
+    }
+
+*/
+    /////////////////////////////////////////////////////
     // Create inverse dynamics chainsolver
     id_solver_.reset(
     new KDL::ChainIdSolver_RNE(
@@ -110,7 +145,7 @@ namespace kdl_controllers  {
     return true;
   }
 
-  bool InverseDynamicsController::init( hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n)
+  bool InverseDynamicsController::init( hardware_interface::EffortJointInterface *robot, hardware_interface::JointStateInterface* hw, ros::NodeHandle &n)
   { 
 
    // Get URDF XML
@@ -141,38 +176,30 @@ namespace kdl_controllers  {
     }
 
     ROS_INFO("LOADING THE TIP LINK PLEASE WAIT");
-    
-    num_joints = 0;
-    // get joint maxs and mins
-    boost::shared_ptr<const urdf::Link> link = urdf_model.getLink(tip_link_);
-    boost::shared_ptr<const urdf::Joint> joint_urdf;
-    
-  /* //root to tip
-    while (tip_link_urdf_ && tip_link_urdf_ ->name != root_link_) 
-    {
-      joint_ = urdf_model.getJoint(link->parent_joint->name);
-    
-      if (!joint_) 
-      {
-        ROS_ERROR("Could not find joint: %s",link->parent_joint->name.c_str());
-        return false;
-      }
-          if (joint_ -> type != urdf::Joint::UNKNOWN && joint_->type != urdf::Joint::FIXED) 
-          {
-                     
-            num_joints++;
-            ROS_INFO("The total number of joints is: %d", num_joints);
-          }
-      
-          link = urdf_model.getLink(link->getParent()->name);
+
+    // get all joint states from the hardware interface
+    const std::vector<std::string>& joint_names = hw->getNames();
+ 
+    for (unsigned i=0 ; i < joint_names.size(); i++)
+      ROS_DEBUG("Got joint %s", joint_names[i].c_str());
+     
+    // get joints and allocate message
+    for (unsigned i=0; i < joint_names.size(); i++){
+      hw->getHandle(joint_names[i]); 
+    /*  name.push_back(joint_names[i]);
+      position.push_back(0.0);
+      velocity.push_back(0.0);
+      effort.push_back(0.0);
+    */
     }
-*/
+                                           
+
     return true;
   }
   
   /*
  
-  bool InverseDynamicsController::readLinks(urdf::Model &urdf_model) 
+  bool InverseDynamicsController::readJoints(urdf::Model &urdf_model) 
   {
       boost::shared_ptr<const urdf::Link> root_link_urdf_ = urdf_model.getLink(root_link_);
       boost::shared_ptr<const urdf::Link> tip_link_urdf_  = urdf_model.getLink(tip_link_);
@@ -233,12 +260,6 @@ namespace kdl_controllers  {
     setCommand(msg->data);
   }
 
-  /*
-  void InverseDynamicsController::constructSolvers() {
-  //construck inverse dynamics controller
-  id_solver_ = new KDL::ChainIdSolver_RNE(kdl_chain_);
-  }
-*/
 } // namespace
 
 PLUGINLIB_EXPORT_CLASS( kdl_controllers::InverseDynamicsController, controller_interface::ControllerBase)
