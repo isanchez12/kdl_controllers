@@ -69,16 +69,18 @@ namespace kdl_controllers
 
   public:
 
-    InverseDynamicsController();
+     InverseDynamicsController();
     ~InverseDynamicsController();
 
-    bool init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n);
+     bool init( hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n);
 
     /*!
      *    * \brief Give set position of the joint for next update: revolute (angle) and prismatic (position)
      *       *
      *          * \param command
      *             */
+    
+    bool loadModel(const std::string xml);
     void setCommand(double cmd);
 
     void starting(const ros::Time& time);
@@ -88,6 +90,8 @@ namespace kdl_controllers
 
     void getGains(double &p, double &i, double &d, double &i_max, double &i_min);
     void setGains(const double &p, const double &i, const double &d, const double &i_max, const double &i_min);
+
+   // void constructSolvers(); 
 
     std::string getJointName();
     hardware_interface::JointHandle joint_;
@@ -101,7 +105,7 @@ namespace kdl_controllers
  
     //Inverse Dynamics Vars:
    // std::vector<double> gravity_;
-
+    int i;
   private:
 
     int loop_count_;
@@ -114,12 +118,14 @@ namespace kdl_controllers
 
     void setCommandCB(const std_msgs::Float64ConstPtr& msg);
 
+   urdf::Model urdf_model;
 
     // Working variables
     unsigned int n_dof_;
     KDL::Tree kdl_tree_;
+
     KDL::Chain kdl_chain_;
-    boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_;
+ /*   boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_;
 
 
     KDL::Wrenches ext_wrenches_;
@@ -127,7 +133,8 @@ namespace kdl_controllers
     KDL::JntArrayVel positions_;
     KDL::JntArray accelerations_;
     KDL::JntArray torques_;
-  };
+  */
+    };
 } // namespace
 #endif
 

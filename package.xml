@@ -14,22 +14,24 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>controller_interface</build_depend> 
-  <build_depend>controllers_msgs</build_depend> 
+  <build_depend>control_msgs</build_depend> 
   <build_depend>realtime_tools</build_depend> 
   <build_depend>urdf</build_depend> 
   <build_depend>forward_command_controller</build_depend>
   <build_depend>kdl_urdf_tools</build_depend>
-  
-  <build_depend>kdl_parser</build_depend>
-  
+  <build_depend>pluginlib</build_depend>
+  <build_depend>orocos_kdl</build_depend>
+  <build_depend>roscpp</build_depend>
+
   <run_depend>controller_interface</run_depend> 
-  <run_depend>controllers_msgs</run_depend> 
+  <run_depend>control_msgs</run_depend> 
   <run_depend>realtime_tools</run_depend> 
   <run_depend>urdf</run_depend> 
   <run_depend>forward_command_controller</run_depend>
   <run_depend>kdl_urdf_tools</run_depend>
-  
-  <run_depend>kdl_parser</run_depend>
+  <run_depend>pluginlib</run_depend>
+  <run_depend>orocos_kdl</run_depend>
+  <run_depend>roscpp</run_depend>
   <export>
     <controller_interface plugin="${prefix}/kdl_controller_plugins.xml"/>
   </export>
