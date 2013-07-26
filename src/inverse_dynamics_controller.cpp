@@ -176,23 +176,26 @@ namespace kdl_controllers  {
     }
 
     ROS_INFO("LOADING THE TIP LINK PLEASE WAIT");
-
+/*
     // get all joint states from the hardware interface
     const std::vector<std::string>& joint_names = hw->getNames();
  
     for (unsigned i=0 ; i < joint_names.size(); i++)
       ROS_DEBUG("Got joint %s", joint_names[i].c_str());
-     
-    // get joints and allocate message
-    for (unsigned i=0; i < joint_names.size(); i++){
-      hw->getHandle(joint_names[i]); 
-    /*  name.push_back(joint_names[i]);
-      position.push_back(0.0);
-      velocity.push_back(0.0);
-      effort.push_back(0.0);
-    */
+
+    // get joints handles and joints states
+    for (unsigned i=0; i < joint_names.size(); i++)
+    {
+      joint_handles_[i] = robot -> getHandle(joint_names[i]); 
+
+      joint_states_.push_back( hw -> getHandle(joint_names[i])); 
+      name.push_back(joint_names[i]); //name of the joint
+      position.push_back(0.0); //storage for the joint's position
+      velocity.push_back(0.0); //storage for the joint's velocity
+      effort.push_back(0.0);   //storage for the joint's torque
+
     }
-                                           
+*/
 
     return true;
   }

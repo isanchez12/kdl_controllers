@@ -62,6 +62,7 @@
 //#include <terse_roscpp/param.h>
 //for finding joints states
 #include <hardware_interface/joint_state_interface.h>
+#include <sensor_msgs/JointState.h>
 
 
 namespace kdl_controllers
@@ -147,8 +148,12 @@ namespace kdl_controllers
     KDL::JntArray accelerations_;
     KDL::JntArray torques_;
  
-    // joint states 
-     std::vector<hardware_interface::JointStateHandle> joint_state_;
+    // joint handles and states 
+     std::vector<hardware_interface::JointHandle> joint_handles_;
+     std::vector<hardware_interface::JointStateHandle> joint_states_;
+
+     std::string name;
+     double position, velocity, effort;
 
     };
 } // namespace
