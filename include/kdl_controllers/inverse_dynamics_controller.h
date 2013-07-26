@@ -119,9 +119,8 @@ namespace kdl_controllers
    
     //Inverse Dynamics Vars:
     std::vector<double> gravity_;
-    int i;
 
-     KDL::ChainIdSolver_RNE* id_solver_; 
+    KDL::ChainIdSolver_RNE* id_solver_; 
   private:
 
     int loop_count_;
@@ -151,7 +150,7 @@ namespace kdl_controllers
 
      std::string name;
      double position, velocity, effort;
-    // boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_; 
+   // boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_; 
     };
 } // namespace
 #endif
