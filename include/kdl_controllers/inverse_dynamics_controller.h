@@ -117,8 +117,6 @@ namespace kdl_controllers
  //   boost::shared_ptr<const urdf::Link> root_link_urdf_;
     boost::shared_ptr<const urdf::Link> tip_link_urdf_;
    
-    unsigned int num_joints;
- 
     //Inverse Dynamics Vars:
     std::vector<double> gravity_;
     int i;

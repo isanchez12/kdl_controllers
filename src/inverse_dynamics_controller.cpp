@@ -53,6 +53,8 @@
 
 boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_(NULL); 
 
+unsigned int num_joints;
+
 namespace kdl_controllers  {
 
   InverseDynamicsController::InverseDynamicsController()
@@ -90,7 +92,8 @@ namespace kdl_controllers  {
       ROS_ERROR("Could not initialize robot kinematics!");
       return false;
     }
- 
+    
+    num_joints = n_dof_;
     ////////////////////GETTING JOINTS ///////////////////////
 //     boost::shared_ptr<const urdf::Link> link = urdf_model.getLink(tip_link_);
  /*   std::string link = tip_link_;
@@ -160,8 +163,6 @@ namespace kdl_controllers  {
       return false;
     }
      
-    // boost::shared_ptr<const urdf::Link> link = urdf_model.getLink(tip_Link_);
-
     // Get Root and Tip From Parameter Service
     if (!n.getParam("/root_link", root_link_)) {
       ROS_FATAL("EE: No root_link_ found on parameter server");
@@ -176,7 +177,7 @@ namespace kdl_controllers  {
     }
 
     ROS_INFO("LOADING THE TIP LINK PLEASE WAIT");
-/*
+
     // get all joint states from the hardware interface
     const std::vector<std::string>& joint_names = hw->getNames();
  
@@ -187,15 +188,15 @@ namespace kdl_controllers  {
     for (unsigned i=0; i < joint_names.size(); i++)
     {
       joint_handles_[i] = robot -> getHandle(joint_names[i]); 
-
+/*
       joint_states_.push_back( hw -> getHandle(joint_names[i])); 
       name.push_back(joint_names[i]); //name of the joint
       position.push_back(0.0); //storage for the joint's position
       velocity.push_back(0.0); //storage for the joint's velocity
       effort.push_back(0.0);   //storage for the joint's torque
-
-    }
 */
+    }
+
 
     return true;
   }
@@ -228,13 +229,12 @@ namespace kdl_controllers  {
   void InverseDynamicsController::starting(const ros::Time& time) 
   {
 
-    /************error with this command**********fix
-     * gzserver: /home/isan/M_catkin_ws/src/ros_control/hardware_interface/include/hardware_interface/joint_state_interface.h:70: 
-     * double hardware_interface::JointStateHandle::getPosition() const: Assertion `pos_' failed.
-     *
-     *
-     */
-      //command_.initRT(joint_.getPosition());
+    //get the positions of all the joints
+    for (unsigned i=0; i < num_joints ; i++)
+    {
+      command_.initRT( joint_handles_[i].getPosition() );
+
+    }
   }
 
 
