@@ -51,13 +51,19 @@
 #include <kdl_urdf_tools/tools.h>
 #include <ros/ros.h>
 
-boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_(NULL); 
+// boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_; 
 
 unsigned int num_joints;
 
 namespace kdl_controllers  {
 
-  InverseDynamicsController::InverseDynamicsController()
+  InverseDynamicsController::InverseDynamicsController(): 
+    id_solver_(NULL)
+    ,ext_wrenches_()
+    ,q_()
+    ,qdot_()
+    ,accelerations_()
+    ,torques_()
   {
   }
 
@@ -79,12 +85,13 @@ namespace kdl_controllers  {
     urdf::Model urdf_model;
     // Construct an URDF model from the xml string
     urdf_model.initString(robot_description_);
+  /*
     // Get a KDL tree from the robot URDF
     if (!kdl_parser::treeFromUrdfModel(urdf_model, kdl_tree_)){
     ROS_ERROR("Failed to construct kdl tree");
     return false;
     }
-    
+    */
     if(!kdl_urdf_tools::initialize_kinematics_from_urdf(
           robot_description_, root_link_, tip_link_,
           n_dof_, kdl_chain_, kdl_tree_, urdf_model))
@@ -126,17 +133,17 @@ namespace kdl_controllers  {
     {
       ROS_INFO("joint  :   %s \n ", joint_(j).c_str());
     }
-
 */
     /////////////////////////////////////////////////////
+   
     // Create inverse dynamics chainsolver
-    id_solver_.reset(
-    new KDL::ChainIdSolver_RNE(
-    kdl_chain_,
-    KDL::Vector(gravity_[0],gravity_[1],gravity_[2])));
+    id_solver_ = new KDL::ChainIdSolver_RNE(
+        kdl_chain_,
+        KDL::Vector(gravity_[0],gravity_[1],gravity_[2]));
 
     // Resize working vectors
-    positions_.resize(n_dof_);
+    q_.resize(n_dof_);   //positions
+    qdot_.resize(n_dof_); //velocities
     accelerations_.resize(n_dof_);
     torques_.resize(n_dof_);
     ext_wrenches_.resize(kdl_chain_.getNrOfSegments());
@@ -200,15 +207,6 @@ namespace kdl_controllers  {
 
     return true;
   }
-  
-  /*
- 
-  bool InverseDynamicsController::readJoints(urdf::Model &urdf_model) 
-  {
-      boost::shared_ptr<const urdf::Link> root_link_urdf_ = urdf_model.getLink(root_link_);
-      boost::shared_ptr<const urdf::Link> tip_link_urdf_  = urdf_model.getLink(tip_link_);
-  }
-*/
 
   std::string InverseDynamicsController::getJointName()
   {
@@ -228,34 +226,75 @@ namespace kdl_controllers  {
 
   void InverseDynamicsController::starting(const ros::Time& time) 
   {
-
-    //get the positions of all the joints
+   //get the positions of all the joints
     for (unsigned i=0; i < num_joints ; i++)
     {
       command_.initRT( joint_handles_[i].getPosition() );
 
     }
+ 
   }
-
-
 
   void InverseDynamicsController::update(const ros::Time& time, const ros::Duration& period)
   {
     double command = *(command_.readFromRT());
-
-  
     
-    //double commanded_effort = pid_controller_.computeCommand(postion, velocity, period); 
-    
-    
-    //  joint_.setCommand( torques_ );
+    ///////////////////COMPUTE POSITION ERROR/////////////////////////////////////////
+  /*  //IS  THIS NECESSARY FOR THE KDL NEWTON EULER COMPUTATION????
+    if (joint_urdf_->type == urdf::Joint::REVOLUTE)
+    {
+      angles::shortest_angular_distance_with_limits(joint_.getPosition(),
+          command,
+          joint_urdf_->limits->lower,
+          joint_urdf_->limits->upper,
+          error);
+    }
+    else if (joint_urdf_->type == urdf::Joint::CONTINUOUS)
+    {
+      error = angles::shortest_angular_distance(joint_.getPosition(), command);
+    }
+    else //prismatic
+    {
+      error = command - joint_.getPosition();
+    }
 
-    //for (unsigned int i = 0 ; i < njoints_ ; i++) 
-    //{
-     //// joint_handles_[i].setCommand( torques_
-      //joint_.setCommand( torques_(i) );  
-    //}
+    // Compute velocity error assuming desired velocity is 0
+    vel_error = 0.0 - joint_.getVelocity();
 
+*/
+//-----------------------------------------------------------------------------
+    // Get the current joint positions and velocities.                                                                                                                              
+    for (unsigned int i=0; i < num_joints; i++) {
+        
+      q_(i)    = joint_handles_[i].getPosition();
+      qdot_(i) = joint_handles_[i].getVelocity();
+
+    }
+/*
+    // Compute inverse dynamics
+    // This computes the torques on each joint of the arm as a function of
+    // the arm's joint-space position, velocities, accelerations, external
+    // forces/torques and gravity.
+    if(id_solver_->CartToJnt(
+          q_,
+          qdot_,
+          accelerations_,
+          ext_wrenches_,
+          torques_) != 0)
+    {
+      ROS_ERROR("Could not compute joint torques!");
+    }
+*/
+    /*
+    // Send joint positions
+    torques_out_port_.write( torques_ );
+
+    for (unsigned i=0; i < num_joints ; i++)
+    {
+      joint_handles_[i].setCommand( torques_ );
+
+    }
+    */
   }
 
   void InverseDynamicsController::setCommandCB(const std_msgs::Float64ConstPtr& msg)

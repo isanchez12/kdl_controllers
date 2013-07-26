@@ -120,6 +120,8 @@ namespace kdl_controllers
     //Inverse Dynamics Vars:
     std::vector<double> gravity_;
     int i;
+
+     KDL::ChainIdSolver_RNE* id_solver_; 
   private:
 
     int loop_count_;
@@ -137,22 +139,19 @@ namespace kdl_controllers
     // Working variables
     KDL::Tree kdl_tree_;
     KDL::Chain kdl_chain_;
-  //  boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_;
-
-
+    
     KDL::Wrenches ext_wrenches_;
-
-    KDL::JntArrayVel positions_;
+    KDL::JntArray q_ ;          //joint positions
+    KDL::JntArray qdot_;     //joint velocities
     KDL::JntArray accelerations_;
     KDL::JntArray torques_;
- 
     // joint handles and states 
      std::vector<hardware_interface::JointHandle> joint_handles_;
      std::vector<hardware_interface::JointStateHandle> joint_states_;
 
      std::string name;
      double position, velocity, effort;
-
+    // boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_; 
     };
 } // namespace
 #endif
