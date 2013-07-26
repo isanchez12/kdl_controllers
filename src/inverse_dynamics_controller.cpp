@@ -292,8 +292,8 @@ namespace kdl_controllers  {
      // joint_handles_[i].setCommand( torques_(i));
     }
 */
-    /*
-    if(id_solver_.CartToJnt(
+ /* 
+    if(id_solver_ -> CartToJnt(
           q_,
           qdot_,
           accelerations_,
@@ -302,7 +302,7 @@ namespace kdl_controllers  {
     {
       ROS_ERROR("Could not compute joint torques!");
     }
-    */
+   */ 
     /*
     // Send joint positions
     torques_out_port_.write( torques_ );
