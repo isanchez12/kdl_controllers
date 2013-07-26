@@ -74,23 +74,17 @@ namespace kdl_controllers
     std::string robot_description_;
     std::string root_link_;
     std::string tip_link_;
-  
+    std::vector<double> gravity_;
+
   public:
 
      InverseDynamicsController();
     ~InverseDynamicsController();
 
     bool init( hardware_interface::EffortJointInterface *robot, 
-        hardware_interface::JointStateInterface* hw, 
         ros::NodeHandle &n);
+//        hardware_interface::JointStateInterface* hw, 
 
-    bool init(
-        const std::string& robot_description_,  
-        const std::string& root_link_,
-        const std::string& tip_link_,
-        KDL::Chain& kdl_chain_ ,
-        KDL::Tree& kdl_tree_,  
-         unsigned int& n_dof_);
     /*!
      *    * \brief Give set position of the joint for next update: revolute (angle) and prismatic (position)
      *       *
@@ -107,8 +101,6 @@ namespace kdl_controllers
     void getGains(double &p, double &i, double &d, double &i_max, double &i_min);
     void setGains(const double &p, const double &i, const double &d, const double &i_max, const double &i_min);
 
-   // void constructSolvers(); 
-
     std::string getJointName();
     hardware_interface::JointHandle joint_;
     boost::shared_ptr<const urdf::Joint> joint_urdf_;
@@ -116,13 +108,9 @@ namespace kdl_controllers
 
  //   boost::shared_ptr<const urdf::Link> root_link_urdf_;
     boost::shared_ptr<const urdf::Link> tip_link_urdf_;
-   
-    //Inverse Dynamics Vars:
-    std::vector<double> gravity_;
-
-    KDL::ChainIdSolver_RNE* id_solver_; 
+  
   private:
-
+    unsigned int n_dof_;
     int loop_count_;
 
     boost::scoped_ptr<
@@ -133,8 +121,8 @@ namespace kdl_controllers
 
     void setCommandCB(const std_msgs::Float64ConstPtr& msg);
 
-   urdf::Model urdf_model;
-
+    urdf::Model urdf_model;
+    
     // Working variables
     KDL::Tree kdl_tree_;
     KDL::Chain kdl_chain_;
@@ -148,9 +136,7 @@ namespace kdl_controllers
      std::vector<hardware_interface::JointHandle> joint_handles_;
      std::vector<hardware_interface::JointStateHandle> joint_states_;
 
-     std::string name;
-     double position, velocity, effort;
-   // boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_; 
+     boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_; 
     };
 } // namespace
 #endif
