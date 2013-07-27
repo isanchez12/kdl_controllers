@@ -52,6 +52,7 @@
 #include <realtime_tools/realtime_buffer.h>
 
 #include <boost/scoped_ptr.hpp>
+#include <kdl/segment.hpp>
 #include <kdl/tree.hpp>
 #include <kdl/chain.hpp>
 #include <kdl/jntarray.hpp>
@@ -61,7 +62,6 @@
 
 //#include <terse_roscpp/param.h>
 //for finding joints states
-#include <hardware_interface/joint_state_interface.h>
 #include <sensor_msgs/JointState.h>
 
 
@@ -75,16 +75,14 @@ namespace kdl_controllers
     std::string root_link_;
     std::string tip_link_;
     std::vector<double> gravity_;
-
+    std::string my_joint;
   public:
 
      InverseDynamicsController();
     ~InverseDynamicsController();
 
-    bool init( hardware_interface::EffortJointInterface *robot, 
-        ros::NodeHandle &n);
-//        hardware_interface::JointStateInterface* hw, 
-
+    bool init( hardware_interface::EffortJointInterface* robot, 
+        ros::NodeHandle &n); 
     /*!
      *    * \brief Give set position of the joint for next update: revolute (angle) and prismatic (position)
      *       *

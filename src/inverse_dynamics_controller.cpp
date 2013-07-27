@@ -58,16 +58,19 @@ unsigned int num_joints;
 namespace kdl_controllers  {
 
   InverseDynamicsController::InverseDynamicsController(): 
-      gravity_(3, 0.0)
-     ,n_dof_(0)
-     ,kdl_tree_()
-     ,kdl_chain_()
-     ,id_solver_(NULL)  
-     ,ext_wrenches_()
-     ,q_()
-     ,qdot_()
-     ,accelerations_()
-     ,torques_()
+       robot_description_("")
+      ,root_link_("")
+      ,tip_link_("")
+      ,gravity_(3, 0.0)
+      ,n_dof_(0)
+      ,kdl_tree_()
+      ,kdl_chain_()
+      ,id_solver_(NULL)  
+      ,ext_wrenches_()
+      ,q_()
+      ,qdot_()
+      ,accelerations_()
+      ,torques_()
   {
   }
 
@@ -76,47 +79,40 @@ namespace kdl_controllers  {
     sub_command_.shutdown();
   }
 
-  bool InverseDynamicsController::init( hardware_interface::EffortJointInterface *robot, 
+  bool InverseDynamicsController::init( hardware_interface::EffortJointInterface* robot, 
                                         ros::NodeHandle &n)
-                                    // ,hardware_interface::JointStateInterface* hw) 
   { 
     urdf::Model urdf_model;
-
     if (!urdf_model.initParam("robot_description"))
     {
       ROS_ERROR("Failed to parse urdf file (namespace: %s)", n.getNamespace().c_str());
       return false;
     }
+   /* 
+    if (!n.getParam("robot_description", robot_description_)){
+      ROS_FATAL(" No robot_description found on parameter server");
+      return false;
+    }
+  */  
     
-    
-     std::string my_joint;
-         if (!n.getParam("mtm_right_outer_yaw_joint", my_joint)){
-                 ROS_ERROR("Could not find joint name");
-                       return false;
-                           }
-         ROS_INFO(" PARAM SERVER HAS FOUND MTM_RIGHT_OUTER_YAW_JOINT");
-        
-        joint_ = robot-> getHandle(my_joint);
+    ROS_INFO("robot model was now successfully found");
 
-    
-    
-    
-    
     // Get Root and Tip From Parameter Service
-    if (!n.getParam("mtm_right_top_panel", root_link_)) {
+    if (!n.getParam("root_link", root_link_)) {
       ROS_FATAL("EE: No root_link_ found on parameter server");
       return false;
     }
 
-     ROS_INFO("LOADING THE TIP LINK PLEASE WAIT");
+     ROS_INFO("LOADING THE ROOT LINK PLEASE WAIT");
 
-    if (!n.getParam("/mtm_right_wrist_roll_link", tip_link_)) {
+    if (!n.getParam("tip_link", tip_link_)) {
       ROS_FATAL("EE: No root_link_ found on parameter server");
       return false;
     }
 
     ROS_INFO("LOADING THE TIP LINK PLEASE WAIT");
-///////////////////////////////////////////////////////////////////////////
+ 
+    ////////////////////////////////////////////////////////////////////////
     
     if(!kdl_urdf_tools::initialize_kinematics_from_urdf(
           robot_description_, root_link_, tip_link_,
@@ -143,13 +139,23 @@ namespace kdl_controllers  {
     // Zero out torque data
     torques_.data.setZero();
     accelerations_.data.setZero();
-    
+  
+//////////////////////////////////////////////////////////////////
+    if (!n.getParam("mtm_right_outer_yaw_joint", my_joint)){
+      ROS_ERROR("Could not find joint name");
+      return false;
+    }
+    ROS_INFO(" PARAM SERVER HAS FOUND MTM_RIGHT_OUTER_YAW_JOINT");
+
+    //joint_ = robot-> getHandle(my_joint);
+ 
     //////////////////////////////////////////////////////////////////////
     // get all joint states from the hardware interface
     
     ROS_INFO("GETTING JOINT HANDLES FROM HARDWARE INTERFACE");
+/*
     boost::shared_ptr<const urdf::Link> link = urdf_model.getLink(tip_link_);
-    boost::shared_ptr<const urdf::Joint> joint_n_ ;
+    boost::shared_ptr<const urdf::Joint> joint_n ;
    
     // Get joint handle from hardware interface
   //  joint_ = robot->getHandle(joint_name);
@@ -160,29 +166,29 @@ namespace kdl_controllers  {
       while ( tip_link_ != root_link_) 
       {
        
-        /*joint_n_ = urdf_model.getJoint(link);
+        joint_n = urdf_model.getJoint(link);
         
-        joint_handles_[i] = robot -> getHandle(joint_n_.getJointName()); 
+        joint_handles_[i] = robot -> getHandle(joint_n.getJointName()); 
         
-        if (!joint_n_) 
+        if (!joint_n) 
         {
-          ROS_ERROR("Could not find joint: %s", joint_n_.c_str());
+          ROS_ERROR("Could not find joint: %s", joint_n.c_str());
           return false;
         }
       
         link = urdf_model.getParent(link);
-      */
+      
         ROS_INFO("NOW ITERATING FROM TIP LINK TO ROOT_LINK");
       }        
     }
    // -----------------------------------------------------------------------
     
-    /*
+    
     //Print out the list of all the joints that will be used
     ROS_INFO("liST OF ALL THE JOINTS THAT WILL BE COMMANDED");
     for (unsigned int j=0; j < n_dof_; j++) 
     {
-      ROS_INFO("joint  :   %s \n ", joint_n_(j).c_str());
+      ROS_INFO("joint  :   %s \n ", joint_n(j).c_str());
     }
 */
     /*
@@ -197,6 +203,9 @@ namespace kdl_controllers  {
     joint_handles_[i] = robot -> getHandle(joint_names[i].getName()); 
     }
     */
+
+
+
     return true;
   }
 
