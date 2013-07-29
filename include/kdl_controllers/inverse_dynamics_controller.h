@@ -64,7 +64,6 @@
 //for finding joints states
 #include <sensor_msgs/JointState.h>
 
-
 namespace kdl_controllers
 {
 
@@ -81,31 +80,21 @@ namespace kdl_controllers
      InverseDynamicsController();
     ~InverseDynamicsController();
 
-    bool init( hardware_interface::EffortJointInterface* robot, 
+    bool init( hardware_interface::EffortJointInterface *robot, 
         ros::NodeHandle &n); 
-    /*!
-     *    * \brief Give set position of the joint for next update: revolute (angle) and prismatic (position)
-     *       *
-     *          * \param command
-     *             */
     
     void setCommand(double cmd);
-
     void starting(const ros::Time& time);
-
     /*!  brief Issues commands to the joint. Should be called at regular intervals    */
     void update(const ros::Time& time, const ros::Duration& period);
-
     void getGains(double &p, double &i, double &d, double &i_max, double &i_min);
     void setGains(const double &p, const double &i, const double &d, const double &i_max, const double &i_min);
 
-    std::string getJointName();
+    std::vector<std::string> getJointNames();
     hardware_interface::JointHandle joint_;
     boost::shared_ptr<const urdf::Joint> joint_urdf_;
     realtime_tools::RealtimeBuffer<double> command_;             /**< Last commanded position. */
-
- //   boost::shared_ptr<const urdf::Link> root_link_urdf_;
-    boost::shared_ptr<const urdf::Link> tip_link_urdf_;
+     
   
   private:
     unsigned int n_dof_;
@@ -116,18 +105,17 @@ namespace kdl_controllers
       control_msgs::JointControllerState> > controller_state_publisher_ ;
 
     ros::Subscriber sub_command_;
-
     void setCommandCB(const std_msgs::Float64ConstPtr& msg);
 
     urdf::Model urdf_model;
-    
     // Working variables
     KDL::Tree kdl_tree_;
     KDL::Chain kdl_chain_;
     
     KDL::Wrenches ext_wrenches_;
-    KDL::JntArray q_ ;          //joint positions
-    KDL::JntArray qdot_;     //joint velocities
+    //KDL::JntArray q_ ;          //joint positions
+    //KDL::JntArray qdot_;     //joint velocities
+    KDL::JntArrayVel positions_;
     KDL::JntArray accelerations_;
     KDL::JntArray torques_;
     // joint handles and states 
@@ -135,7 +123,18 @@ namespace kdl_controllers
      std::vector<hardware_interface::JointStateHandle> joint_states_;
 
      boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_; 
-    };
+     
+     /////////newly added /////////////////////////////////
+     typedef std::map<std::string, hardware_interface::JointHandle> HandleMap;
+     HandleMap handle_map_;
+
+     std::vector<double> pos_, vel_;
+     std::vector<std::string> joint_names_;
+  };
+
+
+
+
 } // namespace
 #endif
 
