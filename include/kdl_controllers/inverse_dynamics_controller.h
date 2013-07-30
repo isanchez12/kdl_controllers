@@ -77,12 +77,15 @@ namespace kdl_controllers
     std::string my_joint;
   public:
 
-     InverseDynamicsController();
+    InverseDynamicsController();
+
     ~InverseDynamicsController();
 
     bool init( hardware_interface::EffortJointInterface *robot, 
         ros::NodeHandle &n); 
-    
+   
+    bool readJoints(urdf::Model &urdf_model);
+
     void setCommand(double cmd);
     void starting(const ros::Time& time);
     /*!  brief Issues commands to the joint. Should be called at regular intervals    */
@@ -92,10 +95,11 @@ namespace kdl_controllers
 
     std::vector<std::string> getJointNames();
     hardware_interface::JointHandle joint_;
+
     boost::shared_ptr<const urdf::Joint> joint_urdf_;
     realtime_tools::RealtimeBuffer<double> command_;             /**< Last commanded position. */
      
-  
+     double pos, vel, eff;
   private:
     unsigned int n_dof_;
     int loop_count_;
@@ -113,8 +117,8 @@ namespace kdl_controllers
     KDL::Chain kdl_chain_;
     
     KDL::Wrenches ext_wrenches_;
-    //KDL::JntArray q_ ;          //joint positions
-    //KDL::JntArray qdot_;     //joint velocities
+   // KDL::JntArray q_ ;          //joint positions
+   // KDL::JntArray qdot_;     //joint velocities
     KDL::JntArrayVel positions_;
     KDL::JntArray accelerations_;
     KDL::JntArray torques_;
@@ -124,12 +128,10 @@ namespace kdl_controllers
 
      boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_; 
      
+     boost::shared_ptr<const urdf::Joint> joints_n_; 
      /////////newly added /////////////////////////////////
-     typedef std::map<std::string, hardware_interface::JointHandle> HandleMap;
-     HandleMap handle_map_;
-
-     std::vector<double> pos_, vel_;
      std::vector<std::string> joint_names_;
+     hardware_interface::JointStateInterface jnt_state_interface;
   };
 
 

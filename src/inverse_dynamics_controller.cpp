@@ -51,29 +51,27 @@
 #include <kdl_urdf_tools/tools.h>
 #include <ros/ros.h>
 
-//boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_(); 
-
 unsigned int num_joints;
 
 namespace kdl_controllers  {
 
-  InverseDynamicsController::InverseDynamicsController(): 
-       robot_description_("")
-      , root_link_("")
-      ,tip_link_("")
-      ,gravity_(3, 0.0)
-      ,n_dof_(0)
-      ,kdl_tree_()
-      ,kdl_chain_()
-      ,id_solver_(NULL)  
-      ,ext_wrenches_()
-  //    ,q_()
-  //    ,qdot_()
-      ,positions_()
-      ,accelerations_()
-      ,torques_()
-  {
-  }
+  InverseDynamicsController::InverseDynamicsController():
+     robot_description_("")
+    ,root_link_("")
+    ,tip_link_("")
+    ,gravity_(3, 0.0)
+    ,n_dof_(0)
+    ,kdl_tree_()
+    ,kdl_chain_()
+    ,id_solver_(NULL)  
+    ,ext_wrenches_()
+    ,positions_()
+    // ,q_() //positions
+    // ,qdot_() //velocities
+     ,accelerations_()
+    ,torques_()
+    {
+    }
 
   InverseDynamicsController::~InverseDynamicsController()
   {
@@ -87,30 +85,18 @@ namespace kdl_controllers  {
     std::string xml_string;
 
     ROS_INFO("searching for URDF to parse");
-    if (!n.getParam(std::string("robot_description"), robot_description_))
+    if (!n.getParam("robot_description", robot_description_))
     {
-      ROS_ERROR("Failed to parse urdf file (namespace: %s)", n.getNamespace().c_str());
+      ROS_ERROR("Failed to find ROBOT_DESCRIPTION FROM THE PARAM SERVER");
       return false;
     }
  
-    if (!urdf_model.initParam(robot_description_)){
+    if (!urdf_model.initString(robot_description_)){
 
       ROS_FATAL("Could not initialize robot model");
       return false;
     }
     ROS_INFO("FOUND URDF AND WAS SUCCESSFULLY PARSED");
-/*    // get all joint states from the hardware interface
-    const std::vector<std::string>& available_joint_names = robot -> getJointNames();
-    for (unsigned i=0; i<available_joint_names.size(); i++)
-      ROS_DEBUG("Got joint %s", available_joint_names[i].c_str());
-
-    joint_handles_.resize(joint_names_.size());                  
-
-    for (unsigned i=0; i<joint_names_.size(); i++){
-      joint_handles_[i] = robot->getHandle(joint_names_[i]);
-    }
-*/
-/*    ROS_INFO("robot model was now successfully found");
 
     // Get Root and Tip From Parameter Service
     if (!n.getParam("root_link", root_link_)) {
@@ -126,7 +112,8 @@ namespace kdl_controllers  {
     }
 
     ROS_INFO("LOADING THE TIP LINK PLEASE WAIT");
- 
+
+
     ////////////////////////////////////////////////////////////////////////
  
     if(!kdl_urdf_tools::initialize_kinematics_from_urdf(
@@ -136,14 +123,32 @@ namespace kdl_controllers  {
       ROS_ERROR("Could not initialize robot kinematics!");
       return false;
     }
+    ROS_INFO("SUCCESSFULLY LOADED KDL_URDF_TOOLS");
     
-    num_joints = n_dof_;
-*/
-    /*   
+    
     // Create inverse dynamics chainsolver
     id_solver_.reset( new KDL::ChainIdSolver_RNE(   
         kdl_chain_,
         KDL::Vector(gravity_[0],gravity_[1],gravity_[2])));
+    
+    num_joints = n_dof_;
+   
+    for (size_t i=0; i<kdl_chain_.getNrOfSegments(); i++){
+     
+      if (kdl_chain_.getSegment(i).getJoint().getType() != KDL::Joint::None){ 
+    /*
+        JointState* jnt = robot_state->getJointState(kdl_chain_.getSegment(i).getJoint().getName());
+        if (!jnt){
+          ROS_ERROR("Joint '%s' is not found in joint state vector", kdl_chain_.getSegment(i).getJoint().getName().c_str());
+          return false;
+        }
+        joints_.push_back(jnt);
+     */ 
+      ROS_INFO("SUCCESSFULLY FOULD JOINTS FROM THE KDL CHAIN");
+      }
+    }
+    //ROS_DEBUG("Added %i joints", int(joints_.size()));
+
 
     // Resize working vectors
     positions_.resize(n_dof_);   //positions & velocities
@@ -155,11 +160,29 @@ namespace kdl_controllers  {
     accelerations_.data.setZero();
   
    /////////////////////////////////////////////////////////////////
-    */
     return true;
   }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  //Get the vector of joint Names register to this interface
+bool InverseDynamicsController::readJoints(urdf::Model &urdf_model)
+{
+  // get joint maxs and mins
+  boost::shared_ptr<const urdf::Link> link = urdf_model.getLink(tip_link_);
+  boost::shared_ptr<const urdf::Joint> joint;
+  //root to tip
+ /* while (link && link->name != root_link_) {
+    joint = urdf_model.getJoint(link->parent_joint->name);
+    if (!joint) {
+      ROS_ERROR("Could not find joint: ");
+      return false;
+    }
+    link = urdf_model.getLink(link->getParent()->name);
+  }
+*/
+  ROS_INFO("LOADING READJOINTS FUNCTION PLEASE WAIT");
+
+}
+/*
+//Get the vector of joint Names register to this interface
   std::vector<std::string> InverseDynamicsController::getJointNames()
   {
     
@@ -171,7 +194,7 @@ namespace kdl_controllers  {
     }   
     return out;
   }
-
+*/
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Set the joint position command
@@ -185,8 +208,8 @@ namespace kdl_controllers  {
 
 
   void InverseDynamicsController::starting(const ros::Time& time) 
-  {
-    /*
+{ 
+  /*
    //get the positions of all the joints
     for (unsigned i=0; i < num_joints ; i++)
     {
@@ -197,18 +220,20 @@ namespace kdl_controllers  {
   void InverseDynamicsController::update(const ros::Time& time, const ros::Duration& period)
   {
     double command = *(command_.readFromRT());
-   /* 
+  /* 
     // Get the current joint positions and velocities.                                                                                                                              
     for (unsigned int i=0; i < num_joints; i++) 
     {
-      q_(i)    = joint_handles_[i].getPosition();
-      qdot_(i) = joint_handles_[i].getVelocity();
+      positions.q_(i)    = joint_handles_[i].getPosition();
+      positions.qdot_(i) = joint_handles_[i].getVelocity();
     }
     // Compute inverse dynamics
     // This computes the torques on each joint of the arm as a function of
     // the arm's joint-space position, velocities, accelerations, external
     // forces/torques and gravity.
-  
+ */
+     
+/*
     if(id_solver_ -> CartToJnt(
           positions_.q_,
           positions_.qdot_,
