@@ -65,9 +65,9 @@ namespace kdl_controllers  {
     ,kdl_chain_()
     ,id_solver_(NULL)  
     ,ext_wrenches_()
-    ,positions_()
-    // ,q_() //positions
-    // ,qdot_() //velocities
+   // ,positions_()
+     ,q_() //positions
+     ,qdot_() //velocities
      ,accelerations_()
     ,torques_()
     {
@@ -133,54 +133,40 @@ namespace kdl_controllers  {
     
     num_joints = n_dof_;
    
-    for (size_t i=0; i<kdl_chain_.getNrOfSegments(); i++){
-     
-      if (kdl_chain_.getSegment(i).getJoint().getType() != KDL::Joint::None){ 
-    /*
-        JointState* jnt = robot_state->getJointState(kdl_chain_.getSegment(i).getJoint().getName());
-        if (!jnt){
-          ROS_ERROR("Joint '%s' is not found in joint state vector", kdl_chain_.getSegment(i).getJoint().getName().c_str());
-          return false;
-        }
-        joints_.push_back(jnt);
-     */ 
-      ROS_INFO("SUCCESSFULLY FOULD JOINTS FROM THE KDL CHAIN");
-      }
-    }
-    //ROS_DEBUG("Added %i joints", int(joints_.size()));
-
 
     // Resize working vectors
-    positions_.resize(n_dof_);   //positions & velocities
+    //positions_.resize(n_dof_);   //positions & velocities
+    q_.resize(n_dof_);
+    qdot_.resize(n_dof_);
     torques_.resize(n_dof_);
     ext_wrenches_.resize(kdl_chain_.getNrOfSegments());
 
     // Zero out torque data
     torques_.data.setZero();
     accelerations_.data.setZero();
-  
+    
+    unsigned int num_actuated_joints_ = 0;
+    /////////////////////////////////////////////////////////////////
+    for (size_t i=0; i<kdl_chain_.getNrOfSegments(); i++){
+
+      if (kdl_chain_.getSegment(i).getJoint().getType() != KDL::Joint::None)
+      { 
+        ROS_INFO("Initializing JOINTS FROM THE KDL CHAIN");
+        ROS_INFO("Joint '%s' is not found in joint state vector", kdl_chain_.getSegment(i).getJoint().getName().c_str());
+        num_actuated_joints_++;           
+        
+        joint_handles_[i] = robot-> getHandle( kdl_chain_.getSegment(i).getJoint().getName()) ;
+      // ROS_INFO(" Joint Names : %s    ",  joint_handles_[i].c_str()); 
+
+       }
+    }
+    ROS_INFO("NUMBER OF ACTUATED JOINTS : %d", num_actuated_joints_);
+    //ROS_DEBUG("Added %i joints", int(joints_.size()));
+
+
    /////////////////////////////////////////////////////////////////
     return true;
   }
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bool InverseDynamicsController::readJoints(urdf::Model &urdf_model)
-{
-  // get joint maxs and mins
-  boost::shared_ptr<const urdf::Link> link = urdf_model.getLink(tip_link_);
-  boost::shared_ptr<const urdf::Joint> joint;
-  //root to tip
- /* while (link && link->name != root_link_) {
-    joint = urdf_model.getJoint(link->parent_joint->name);
-    if (!joint) {
-      ROS_ERROR("Could not find joint: ");
-      return false;
-    }
-    link = urdf_model.getLink(link->getParent()->name);
-  }
-*/
-  ROS_INFO("LOADING READJOINTS FUNCTION PLEASE WAIT");
-
-}
 /*
 //Get the vector of joint Names register to this interface
   std::vector<std::string> InverseDynamicsController::getJointNames()
@@ -220,23 +206,31 @@ bool InverseDynamicsController::readJoints(urdf::Model &urdf_model)
   void InverseDynamicsController::update(const ros::Time& time, const ros::Duration& period)
   {
     double command = *(command_.readFromRT());
-  /* 
-    // Get the current joint positions and velocities.                                                                                                                              
-    for (unsigned int i=0; i < num_joints; i++) 
-    {
-      positions.q_(i)    = joint_handles_[i].getPosition();
-      positions.qdot_(i) = joint_handles_[i].getVelocity();
+/*
+    //GET JOINT POSITIONS AND VELOCITIES
+   /////////////////////////////////////////////////////////////////
+    for (size_t i=0; i<kdl_chain_.getNrOfSegments(); i++){
+
+      if (kdl_chain_.getSegment(i).getJoint().getType() != KDL::Joint::None)
+      { 
+        ROS_INFO("SUCCESSFULLY FOULD JOINTS FROM THE KDL CHAIN");
+   //   q_[i] = joints_handles_[i].getPosition();
+   //   qdot_[i] = joints_handles_[i].getVeloctiy();
+      }
     }
+    //ROS_DEBUG("Added %i joints", int(joints_.size()));
+*/
+
+   /////////////////////////////////////////////////////////////////
     // Compute inverse dynamics
     // This computes the torques on each joint of the arm as a function of
     // the arm's joint-space position, velocities, accelerations, external
     // forces/torques and gravity.
- */
      
 /*
     if(id_solver_ -> CartToJnt(
-          positions_.q_,
-          positions_.qdot_,
+          q_,
+          qdot_,
           accelerations_,
           ext_wrenches_,
           torques_) != 0)

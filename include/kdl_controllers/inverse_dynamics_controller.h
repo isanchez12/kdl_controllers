@@ -99,7 +99,8 @@ namespace kdl_controllers
     boost::shared_ptr<const urdf::Joint> joint_urdf_;
     realtime_tools::RealtimeBuffer<double> command_;             /**< Last commanded position. */
      
-     double pos, vel, eff;
+    std::vector<double> pos, vel, eff;
+    std::vector<hardware_interface::JointHandle> joint_handles_;
   private:
     unsigned int n_dof_;
     int loop_count_;
@@ -117,13 +118,13 @@ namespace kdl_controllers
     KDL::Chain kdl_chain_;
     
     KDL::Wrenches ext_wrenches_;
-   // KDL::JntArray q_ ;          //joint positions
-   // KDL::JntArray qdot_;     //joint velocities
-    KDL::JntArrayVel positions_;
+    KDL::JntArray q_ ;          //joint positions
+    KDL::JntArray qdot_;     //joint velocities
+    //KDL::JntArrayVel positions_;
     KDL::JntArray accelerations_;
     KDL::JntArray torques_;
     // joint handles and states 
-     std::vector<hardware_interface::JointHandle> joint_handles_;
+   //  std::vector<hardware_interface::JointHandle> joint_handles_;
      std::vector<hardware_interface::JointStateHandle> joint_states_;
 
      boost::scoped_ptr<KDL::ChainIdSolver_RNE> id_solver_; 
