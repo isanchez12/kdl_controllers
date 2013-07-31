@@ -241,16 +241,20 @@ void InverseDynamicsController::getPositions(std::vector<double> &positions)
     {
          pos[j]  = joint_handles_[j].getPosition();
          vel[j]  = joint_handles_[j].getVelocity();
+         //ROS_INFO("POSITION FOR JOINT HANDLE '%d' : '%lf'", j, pos[j]);
+         
+         //store joint positions in the KDL::JntArray for q_ & qdot_
+         q_(j) = pos[j];
+         qdot_(j) = vel[j];
+    
     }
-    //ROS_DEBUG("Added %i joints", int(joints_.size()));
-   
+     
     /////////////////////////////////////////////////////////////////
     // Compute inverse dynamics
     // This computes the torques on each joint of the arm as a function of
     // the arm's joint-space position, velocities, accelerations, external
     // forces/torques and gravity.
-     
-/*
+    /* 
     if(id_solver_ -> CartToJnt(
           q_,
           qdot_,
@@ -260,8 +264,7 @@ void InverseDynamicsController::getPositions(std::vector<double> &positions)
     {
       ROS_ERROR("Could not compute joint torques!");
     }
-*/
-    /*
+   */ /*
     for (uint i = 0; i < num_joints ; i++) 
     {
 
