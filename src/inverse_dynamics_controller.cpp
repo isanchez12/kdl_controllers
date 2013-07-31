@@ -144,12 +144,24 @@ namespace kdl_controllers  {
     // Zero out torque data
     torques_.data.setZero();
     accelerations_.data.setZero();
-    
+
     unsigned int num_actuated_joints_ = 0;
-    
-  ROS_INFO("Registering hardware interfaces...");
+
+    ROS_INFO("Checking to see which joints are actuated");
+    ROS_INFO("Initializing JOINTS FROM THE KDL CHAIN");
+    for (size_t i=0; i<kdl_chain_.getNrOfSegments(); i++){
+
+      if (kdl_chain_.getSegment(i).getJoint().getType() != KDL::Joint::None)
+      { 
+        ROS_INFO("Joint '%s' is was found in the kdl chain", kdl_chain_.getSegment(i).getJoint().getName().c_str());
+        num_actuated_joints_++;           
+      }
+    }
+    ROS_INFO("NUMBER OF ACTUATED JOINTS : %d", num_actuated_joints_);
 
       //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    
+    //Creating a string vector of all the actuated joint names
     for(std::vector<KDL::Segment>::const_iterator segment=kdl_chain_.segments.begin();
         segment != kdl_chain_.segments.end();
         segment++)
@@ -157,12 +169,11 @@ namespace kdl_controllers  {
        joint_names_.push_back(segment->getJoint().getName());
     }
  
-
     joint_handles_.resize(n_dof_);
   
     for( unsigned int j=0; j < n_dof_; j++) {
       // if(!n.getParam(joint_names_[i], 
-      ROS_INFO("Joint '%s' is one the joint names", joint_names_[j].c_str());
+      ROS_INFO("Joint '%s' was registerd as a joint name", joint_names_[j].c_str());
       //getting joint handle from hardware interfarce
       joint_handles_[j] = robot-> getHandle(joint_names_[j]);
     
@@ -183,54 +194,17 @@ namespace kdl_controllers  {
         joint_state_interface_.getJointStateHandle(joint_names_[j]),
         &torques_(j));
   }     
-    
        this->registerInterface(&joint_state_interface_); 
        this->registerInterface(&effort_command_interface_); 
   */
-      //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-       /* 
-    /////////////////////////////////////////////////////////////////
-    for (size_t i=0; i<kdl_chain_.getNrOfSegments(); i++){
 
-      if (kdl_chain_.getSegment(i).getJoint().getType() != KDL::Joint::None)
-      { 
-        ROS_INFO("Initializing JOINTS FROM THE KDL CHAIN");
-        ROS_INFO("Joint '%s' is not found in joint state vector", kdl_chain_.getSegment(i).getJoint().getName().c_str());
-        num_actuated_joints_++;           
-        joint_handles_.push_back(kdl_chain_.getSegment(i).getJoint().getName());
-       // joint_handles_[i] = robot-> getHandle( kdl_chain_.getSegment(i).getJoint().getName()) ;
-      // ROS_INFO(" Joint Names : %s    ",  joint_handles_[i].c_str()); 
-
-       }
-    }
-    ROS_INFO("NUMBER OF ACTUATED JOINTS : %d", num_actuated_joints_);
-    //ROS_DEBUG("Added %i joints", int(joints_.size()));
-*/
-
-   /////////////////////////////////////////////////////////////////
     return true;
   }
 /*
 void InverseDynamicsController::getPositions(std::vector<double> &positions)
 {
-    
-
 
 }
-*/
-/*
-//Get the vector of joint Names register to this interface
-  std::vector<std::string> InverseDynamicsController::getJointNames()
-  {
-    
-    std::vector<std::string> out;
-    out.reserve(handle_map_.size());
-    for( HandleMap::const_iterator it = handle_map_.begin(); it != handle_map_.end(); ++it)
-    {   
-      out.push_back(it->first);
-    }   
-    return out;
-  }
 */
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -246,13 +220,19 @@ void InverseDynamicsController::getPositions(std::vector<double> &positions)
 
   void InverseDynamicsController::starting(const ros::Time& time) 
 { 
-  /*
-   //get the positions of all the joints
+ /*  //get the positions of all the joints
     for (unsigned i=0; i < num_joints ; i++)
     {
       command_.initRT( joint_handles_[i].getPosition() );
     }
- */
+    for( unsigned int j=0; j < n_dof_; j++) {
+      // if(!n.getParam(joint_names_[i], 
+      ROS_INFO("Joint '%s' was registerd as a joint name", joint_names_[j].c_str());
+      //getting joint handle from hardware interfarce
+      joint_handles_[j] = robot-> getHandle(joint_names_[j]);
+    
+    }
+    */
   }
   void InverseDynamicsController::update(const ros::Time& time, const ros::Duration& period)
   {
