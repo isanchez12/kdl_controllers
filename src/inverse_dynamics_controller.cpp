@@ -173,7 +173,7 @@ namespace kdl_controllers  {
   
     for( unsigned int j=0; j < n_dof_; j++)
     {
-      ROS_INFO("Joint '%s' was registerd as a joint name", joint_names_[j].c_str());
+      ROS_INFO("Joint%d_ '%s' was registerd as a joint name", j, joint_names_[j].c_str());
       //getting joint handle from hardware interfarce
       joint_handles_[j] = robot-> getHandle(joint_names_[j]);
     
@@ -181,22 +181,6 @@ namespace kdl_controllers  {
    
     ROS_INFO("SUCCESSFULLY got the joint handles from the hardware inteface");
     ROS_INFO("INIT SUCCESSFULLY COMPLETED");
-    /*    // Register the joints
-  for(unsigned int j=0; j < n_dof_; j++) {
-    // Register this joint with the joint state interface
-    jnt_state_interface_.registerJoint(
-        joint_names_[j],
-        &joint_state_.q(j),
-        &joint_state_.qdot(j),
-        &torques_(j));
-    // Register this joint with the effort command interface
-    effort_command_interface_.registerJoint(
-        joint_state_interface_.getJointStateHandle(joint_names_[j]),
-        &torques_(j));
-  }     
-       this->registerInterface(&joint_state_interface_); 
-       this->registerInterface(&effort_command_interface_); 
-  */
 
     return true;
   }
@@ -226,7 +210,6 @@ void InverseDynamicsController::getPositions(std::vector<double> &positions)
       command_.initRT( joint_handles_[j].getPosition() );
     }
   
-  //    ROS_INFO("Joint '%s' was registerd as a joint name", joint_names_[j].c_str());
   }
   void InverseDynamicsController::update(const ros::Time& time, const ros::Duration& period)
   {
@@ -246,7 +229,8 @@ void InverseDynamicsController::getPositions(std::vector<double> &positions)
          //store joint positions in the KDL::JntArray for q_ & qdot_
          q_(j) = pos[j];
          qdot_(j) = vel[j];
-    
+        // ROS_INFO("Joint_handle_: %d , POS: %lf, VEL: %lf", j, q_(j), qdot_(j) );
+        
     }
      
     /////////////////////////////////////////////////////////////////
@@ -254,8 +238,7 @@ void InverseDynamicsController::getPositions(std::vector<double> &positions)
     // This computes the torques on each joint of the arm as a function of
     // the arm's joint-space position, velocities, accelerations, external
     // forces/torques and gravity.
-    /* 
-    if(id_solver_ -> CartToJnt(
+   /* if(id_solver_ -> CartToJnt(
           q_,
           qdot_,
           accelerations_,
@@ -272,6 +255,19 @@ void InverseDynamicsController::getPositions(std::vector<double> &positions)
      // joint_handles_[i].setCommand( torques_(i));
     }
 */
+ //OPTION 2 ------------------------------------------
+   int id_valid = id_solver_ -> CartToJnt( q_,qdot_,accelerations_,ext_wrenches_, torques_);
+   /// Only when a solution is found it will be send
+   if ( id_valid >= 0 ) 
+   {
+    ROS_INFO("Congratualations you have finally computed the inverse dynamics solution");
+   }
+   else {
+        ROS_INFO("ID SOLUTION FOUND for inverse dynamics solver!!:\n");
+       // ROS_INFO("Positions:%lf  , Velocity: %lf, Torques: %lf ", q_, qdot_, torques_ );
+       
+   }
+
   }
 
   void InverseDynamicsController::setCommandCB(const std_msgs::Float64ConstPtr& msg)
