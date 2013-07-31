@@ -146,6 +146,37 @@ namespace kdl_controllers  {
     accelerations_.data.setZero();
     
     unsigned int num_actuated_joints_ = 0;
+    
+  ROS_INFO("Registering hardware interfaces...");
+
+      //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    for(std::vector<KDL::Segment>::const_iterator segment=kdl_chain_.segments.begin();
+        segment != kdl_chain_.segments.end();
+        segment++)
+    {   
+       joint_names_.push_back(segment->getJoint().getName());
+    }
+       /*
+  // Register the joints
+  for(unsigned int j=0; j < n_dof_; j++) {
+    // Register this joint with the joint state interface
+    jnt_state_interface_.registerJoint(
+        joint_names_[j],
+        &joint_state_.q(j),
+        &joint_state_.qdot(j),
+        &torques_(j));
+    // Register this joint with the effort command interface
+    effort_command_interface_.registerJoint(
+        joint_state_interface_.getJointStateHandle(joint_names_[j]),
+        &torques_(j));
+  }     
+       
+    
+       this->registerInterface(&joint_state_interface_); 
+       this->registerInterface(&effort_command_interface_); 
+  */
+      //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+       /* 
     /////////////////////////////////////////////////////////////////
     for (size_t i=0; i<kdl_chain_.getNrOfSegments(); i++){
 
@@ -154,19 +185,27 @@ namespace kdl_controllers  {
         ROS_INFO("Initializing JOINTS FROM THE KDL CHAIN");
         ROS_INFO("Joint '%s' is not found in joint state vector", kdl_chain_.getSegment(i).getJoint().getName().c_str());
         num_actuated_joints_++;           
-        
-        joint_handles_[i] = robot-> getHandle( kdl_chain_.getSegment(i).getJoint().getName()) ;
+        joint_handles_.push_back(kdl_chain_.getSegment(i).getJoint().getName());
+       // joint_handles_[i] = robot-> getHandle( kdl_chain_.getSegment(i).getJoint().getName()) ;
       // ROS_INFO(" Joint Names : %s    ",  joint_handles_[i].c_str()); 
 
        }
     }
     ROS_INFO("NUMBER OF ACTUATED JOINTS : %d", num_actuated_joints_);
     //ROS_DEBUG("Added %i joints", int(joints_.size()));
-
+*/
 
    /////////////////////////////////////////////////////////////////
     return true;
   }
+/*
+void InverseDynamicsController::getPositions(std::vector<double> &positions)
+{
+    
+
+
+}
+*/
 /*
 //Get the vector of joint Names register to this interface
   std::vector<std::string> InverseDynamicsController::getJointNames()

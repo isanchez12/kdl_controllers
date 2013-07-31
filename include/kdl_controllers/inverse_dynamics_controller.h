@@ -101,9 +101,14 @@ namespace kdl_controllers
      
     std::vector<double> pos, vel, eff;
     std::vector<hardware_interface::JointHandle> joint_handles_;
+     /////////////////////////////////////////////
+     std::vector<double> initial_positions_;
+
+     std::vector<std::string> joint_names_;
   private:
     unsigned int n_dof_;
     int loop_count_;
+    unsigned int num_actuated_joints_;
 
     boost::scoped_ptr<
       realtime_tools::RealtimePublisher<
@@ -131,8 +136,9 @@ namespace kdl_controllers
      
      boost::shared_ptr<const urdf::Joint> joints_n_; 
      /////////newly added /////////////////////////////////
-     std::vector<std::string> joint_names_;
      hardware_interface::JointStateInterface jnt_state_interface;
+     
+     
   };
 
 
