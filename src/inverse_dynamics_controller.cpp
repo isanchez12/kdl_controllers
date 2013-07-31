@@ -171,8 +171,8 @@ namespace kdl_controllers  {
  
     joint_handles_.resize(n_dof_);
   
-    for( unsigned int j=0; j < n_dof_; j++) {
-      // if(!n.getParam(joint_names_[i], 
+    for( unsigned int j=0; j < n_dof_; j++)
+    {
       ROS_INFO("Joint '%s' was registerd as a joint name", joint_names_[j].c_str());
       //getting joint handle from hardware interfarce
       joint_handles_[j] = robot-> getHandle(joint_names_[j]);
@@ -180,7 +180,7 @@ namespace kdl_controllers  {
     }
    
     ROS_INFO("SUCCESSFULLY got the joint handles from the hardware inteface");
-
+    ROS_INFO("INIT SUCCESSFULLY COMPLETED");
     /*    // Register the joints
   for(unsigned int j=0; j < n_dof_; j++) {
     // Register this joint with the joint state interface
@@ -220,39 +220,31 @@ void InverseDynamicsController::getPositions(std::vector<double> &positions)
 
   void InverseDynamicsController::starting(const ros::Time& time) 
 { 
- /*  //get the positions of all the joints
-    for (unsigned i=0; i < num_joints ; i++)
+   //get the positions of all the joints
+    for( unsigned int j=0; j < n_dof_; j++) 
     {
-      command_.initRT( joint_handles_[i].getPosition() );
+      command_.initRT( joint_handles_[j].getPosition() );
     }
-    for( unsigned int j=0; j < n_dof_; j++) {
-      // if(!n.getParam(joint_names_[i], 
-      ROS_INFO("Joint '%s' was registerd as a joint name", joint_names_[j].c_str());
-      //getting joint handle from hardware interfarce
-      joint_handles_[j] = robot-> getHandle(joint_names_[j]);
-    
-    }
-    */
+  
+  //    ROS_INFO("Joint '%s' was registerd as a joint name", joint_names_[j].c_str());
   }
   void InverseDynamicsController::update(const ros::Time& time, const ros::Duration& period)
   {
     double command = *(command_.readFromRT());
-/*
+  
+    std::vector<double> pos, vel;
+    pos.resize(n_dof_);
+    vel.resize(n_dof_);
     //GET JOINT POSITIONS AND VELOCITIES
    /////////////////////////////////////////////////////////////////
-    for (size_t i=0; i<kdl_chain_.getNrOfSegments(); i++){
-
-      if (kdl_chain_.getSegment(i).getJoint().getType() != KDL::Joint::None)
-      { 
-        ROS_INFO("SUCCESSFULLY FOULD JOINTS FROM THE KDL CHAIN");
-   //   q_[i] = joints_handles_[i].getPosition();
-   //   qdot_[i] = joints_handles_[i].getVeloctiy();
-      }
+    for( unsigned int j=0; j < n_dof_; j++) 
+    {
+         pos[j]  = joint_handles_[j].getPosition();
+         vel[j]  = joint_handles_[j].getVelocity();
     }
     //ROS_DEBUG("Added %i joints", int(joints_.size()));
-*/
-
-   /////////////////////////////////////////////////////////////////
+   
+    /////////////////////////////////////////////////////////////////
     // Compute inverse dynamics
     // This computes the torques on each joint of the arm as a function of
     // the arm's joint-space position, velocities, accelerations, external

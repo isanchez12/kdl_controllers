@@ -100,11 +100,13 @@ namespace kdl_controllers
     realtime_tools::RealtimeBuffer<double> command_;             /**< Last commanded position. */
      
     std::vector<double> pos, vel, eff;
+
     std::vector<hardware_interface::JointHandle> joint_handles_;
      /////////////////////////////////////////////
      std::vector<double> initial_positions_;
-
      std::vector<std::string> joint_names_;
+ 
+  
   private:
     unsigned int n_dof_;
     int loop_count_;
