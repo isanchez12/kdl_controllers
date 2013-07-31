@@ -156,8 +156,21 @@ namespace kdl_controllers  {
     {   
        joint_names_.push_back(segment->getJoint().getName());
     }
-       /*
-  // Register the joints
+ 
+
+    joint_handles_.resize(n_dof_);
+  
+    for( unsigned int j=0; j < n_dof_; j++) {
+      // if(!n.getParam(joint_names_[i], 
+      ROS_INFO("Joint '%s' is one the joint names", joint_names_[j].c_str());
+      //getting joint handle from hardware interfarce
+      joint_handles_[j] = robot-> getHandle(joint_names_[j]);
+    
+    }
+   
+    ROS_INFO("SUCCESSFULLY got the joint handles from the hardware inteface");
+
+    /*    // Register the joints
   for(unsigned int j=0; j < n_dof_; j++) {
     // Register this joint with the joint state interface
     jnt_state_interface_.registerJoint(
@@ -170,7 +183,6 @@ namespace kdl_controllers  {
         joint_state_interface_.getJointStateHandle(joint_names_[j]),
         &torques_(j));
   }     
-       
     
        this->registerInterface(&joint_state_interface_); 
        this->registerInterface(&effort_command_interface_); 
