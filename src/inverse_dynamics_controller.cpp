@@ -125,22 +125,31 @@ namespace kdl_controllers  {
     }
     ROS_INFO("SUCCESSFULLY LOADED KDL_URDF_TOOLS");
     
-    
+  //  gravity_[0]= 0.0;
+  //  gravity_[1]= 0.0; 
+    gravity_[2]= -9.8;
+
     // Create inverse dynamics chainsolver
     id_solver_.reset( new KDL::ChainIdSolver_RNE(   
         kdl_chain_,
         KDL::Vector(gravity_[0],gravity_[1],gravity_[2])));
-    
+
+
     num_joints = n_dof_;
-   
+
+
 
     // Resize working vectors
     //positions_.resize(n_dof_);   //positions & velocities
     q_.resize(n_dof_);
     qdot_.resize(n_dof_);
+    accelerations_.resize(n_dof_);
     torques_.resize(n_dof_);
     ext_wrenches_.resize(kdl_chain_.getNrOfSegments());
 
+    ROS_INFO(" THE SIZE OF KDL_CHAIN from the number fo segments: %d", kdl_chain_.getNrOfSegments());
+    ROS_INFO(" SIZE OF ROWS FOR- q_: %d , qdot_: %d, qdotdot_: %d, torques_ : %d",
+                q_.rows(), qdot_.rows(), accelerations_.rows(), torques_.rows());
     // Zero out torque data
     torques_.data.setZero();
     accelerations_.data.setZero();
@@ -178,7 +187,7 @@ namespace kdl_controllers  {
       joint_handles_[j] = robot-> getHandle(joint_names_[j]);
     
     }
-   
+    ROS_INFO("N_DOF_ =  '%d' ", n_dof_);
     ROS_INFO("SUCCESSFULLY got the joint handles from the hardware inteface");
     ROS_INFO("INIT SUCCESSFULLY COMPLETED");
 
@@ -202,18 +211,11 @@ void InverseDynamicsController::getPositions(std::vector<double> &positions)
   }
 
 
-  void InverseDynamicsController::starting(const ros::Time& time) 
+void InverseDynamicsController::starting(const ros::Time& time) 
 { 
-   //get the positions of all the joints
-    for( unsigned int j=0; j < n_dof_; j++) 
-    {
-      command_.initRT( joint_handles_[j].getPosition() );
-    }
-  
-  }
+}
   void InverseDynamicsController::update(const ros::Time& time, const ros::Duration& period)
   {
-    double command = *(command_.readFromRT());
   
     std::vector<double> pos, vel;
     pos.resize(n_dof_);
@@ -256,16 +258,33 @@ void InverseDynamicsController::getPositions(std::vector<double> &positions)
     }
 */
  //OPTION 2 ------------------------------------------
-   int id_valid = id_solver_ -> CartToJnt( q_,qdot_,accelerations_,ext_wrenches_, torques_);
+   
+    static unsigned int foo = 0; 
+
+    int id_valid = id_solver_ -> CartToJnt( q_,qdot_,accelerations_,ext_wrenches_, torques_);
    /// Only when a solution is found it will be send
    if ( id_valid >= 0 ) 
    {
-    ROS_INFO("Congratualations you have finally computed the inverse dynamics solution");
-   }
-   else {
-        ROS_INFO("ID SOLUTION FOUND for inverse dynamics solver!!:\n");
-       // ROS_INFO("Positions:%lf  , Velocity: %lf, Torques: %lf ", q_, qdot_, torques_ );
+     for( unsigned int j=0; j < n_dof_; j++) 
+     {
+       joint_handles_[j].setCommand( torques_(j));
        
+    /*   if(  foo == 10)
+       {
+         ROS_INFO(" TORQUE OUTPUT for '%d' : %lf ", j, torques_(j));   
+         foo = 0;
+       }
+       */
+      }
+       if(foo++ % 100 == 0) {
+         ROS_DEBUG_STREAM(" TORQUE OUTPUT: " << torques_.data);   
+       }
+   }
+   else
+   {
+     //  ROS_INFO("ID SOLUTION NOT for inverse dynamics solver!!:\n");
+     // DO NOT USE THIS-> ROS_INFO("Positions:%lf  , Velocity: %lf, Torques: %lf ", q_, qdot_, torques_ );
+        ROS_INFO(" ID is not Valid and is: %d", id_valid);
    }
 
   }
